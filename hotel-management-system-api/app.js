@@ -14,6 +14,7 @@ app.use(express.json()); // بديل bodyParser.json()
 app.use(express.urlencoded({ extended: true })); // لتحليل الفورمات العادية
 
 // Routes
+// const routes = require('./routes');
 app.use("/api", routes);
 
 // Error handler (بسيط)
