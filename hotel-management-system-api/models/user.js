@@ -44,7 +44,14 @@ module.exports = (sequelize, DataTypes) => {
       passwordHash: DataTypes.STRING,
       phone: DataTypes.STRING,
       role: {
-        type: DataTypes.ENUM("admin", "receptionist", "broker", "customer"),
+        type: DataTypes.ENUM(
+          "admin",
+          "receptionist",
+          "broker",
+          "customer",
+          "student",
+          "doctor"
+        ),
         allowNull: false,
       },
       nationalId: DataTypes.STRING,
