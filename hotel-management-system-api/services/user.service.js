@@ -22,6 +22,14 @@ const createUser = async ({
   address,
   notes,
 }) => {
+  if (!password) {
+    throw new Error("Password is required");
+  }
+
+  if (!VALID_ROLES.includes(role)) {
+    throw new Error("Invalid role");
+  }
+
   const existingUser = await db.User.findOne({ where: { email } });
   if (existingUser) {
     throw new Error("User already exists with this email");
@@ -37,7 +45,7 @@ const createUser = async ({
     role,
     nationalId,
     address,
-    isActive: true,
+    isActive: true, // يتم تعيينه تلقائياً
     notes,
   });
 
@@ -86,5 +94,50 @@ const getAllUsers = async ({ role }) => {
   }
   return db.User.findAll({ where });
 };
+const { User } = require("../models");
 
-module.exports = { getUser, createUser, getAllUsers };
+const updateUser = async (userId, data, currentUser) => {
+  const user = await db.User.findByPk(userId);
+  if (!user) throw { status: 404, message: "User not found" };
+
+  const {
+    username,
+    email,
+    password,
+    phone,
+    address,
+    role,
+    nationalId,
+    isActive,
+    notes,
+  } = data;
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  // المستخدم العادي ما بيقدر يغير الدور
+  const newRole =
+    currentUser.role === "admin" || currentUser.role === "receptionist"
+      ? role
+      : undefined;
+
+  await user.update({
+    username,
+    email,
+    passwordHash,
+    phone,
+    address,
+    role: newRole,
+    nationalId,
+    isActive,
+    notes,
+  });
+
+  return user;
+};
+const deleteUser = async (userId) => {
+  const user = await User.findByPk(userId);
+  if (!user) throw { status: 404, message: "User not found" };
+
+  await user.destroy();
+  return;
+};
+module.exports = { getUser, createUser, getAllUsers, updateUser, deleteUser };

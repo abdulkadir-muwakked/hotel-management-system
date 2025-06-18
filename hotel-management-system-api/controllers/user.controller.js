@@ -17,8 +17,8 @@ const createUser = async (req, res) => {
         .json({ message: "Receptionist cannot create another receptionist" });
     }
 
-    // باقي الفحص حسب ما بدك
-    const newUser = await db.User.create(req.body);
+    // استخدم دالة السيرفس بدلاً من الإنشاء المباشر
+    const newUser = await userService.createUser(req.body);
     res.status(201).json(newUser);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -68,4 +68,36 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-module.exports = { index, getUser, createUser, getAllUsers };
+const updateUser = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const updatedUser = await userService.updateUser(
+      userId,
+      req.body,
+      req.user
+    );
+    res.json({ message: "User updated", user: updatedUser });
+  } catch (err) {
+    const status = err.status || 500;
+    res.status(status).json({ message: err.message || "Server error" });
+  }
+};
+const deleteUser = async (req, res) => {
+  const userId = req.params.id;
+  try {
+    await userService.deleteUser(userId);
+    res.json({ message: "User deleted successfully" });
+  } catch (err) {
+    const status = err.status || 500;
+    res.status(status).json({ message: err.message || "Server error" });
+  }
+};
+
+module.exports = {
+  index,
+  getUser,
+  createUser,
+  getAllUsers,
+  updateUser,
+  deleteUser,
+};

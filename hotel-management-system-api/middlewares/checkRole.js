@@ -13,4 +13,16 @@ function isAdminOrReceptionist(req, res, next) {
   }
   next();
 }
-module.exports = { isAdminOrReceptionist };
+function isAdminReceptionistOrSelf(req, res, next) {
+  const userId = parseInt(req.params.id);
+  if (
+    req.user.role === "admin" ||
+    req.user.role === "receptionist" ||
+    req.user.id === userId
+  ) {
+    next();
+  } else {
+    return res.status(403).json({ message: "Access denied" });
+  }
+}
+module.exports = { isAdminOrReceptionist, isAdminReceptionistOrSelf };
