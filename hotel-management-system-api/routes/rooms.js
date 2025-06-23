@@ -16,6 +16,10 @@ router.post("/", checkRole.isAdminOrReceptionist, roomController.createRoom);
 // PUT /rooms/:id - admin or receptionist only
 router.put("/:id", checkRole.isAdminOrReceptionist, roomController.updateRoom);
 // DELETE /rooms/:id - admin or receptionist only
-router.delete("/:id", checkRole.isAdminOrReceptionist, roomController.deleteRoom);
+router.delete(
+  "/:id",
+  checkRole.isAdminOrReceptionist,
+  roomController.deleteRoom
+);
 
 module.exports = router;

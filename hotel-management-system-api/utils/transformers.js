@@ -17,4 +17,31 @@ function userTransformer(user) {
   };
 }
 
-module.exports = { userTransformer };
+function reservationTransformer(reservation) {
+  if (!reservation) return null;
+
+  return {
+    id: reservation.id,
+    roomId: reservation.roomId,
+    reservationType: reservation.reservationType,
+    createdBy: reservation.createdBy,
+    brokerId: reservation.brokerId,
+    checkIn: reservation.checkIn,
+    checkOut: reservation.checkOut,
+    paidAmount: reservation.paidAmount,
+    paymentStatus: reservation.paymentStatus,
+    notes: reservation.notes,
+    createdAt: reservation.createdAt,
+    updatedAt: reservation.updatedAt,
+    customers:
+      reservation.customers?.map((user) => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      })) || [],
+  };
+}
+
+module.exports = { userTransformer, reservationTransformer };

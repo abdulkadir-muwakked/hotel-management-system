@@ -1,5 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
+const { RESERVATION_TYPES } = require("../utils/constants");
+
 module.exports = (sequelize, DataTypes) => {
   class Reservation extends Model {
     /**
@@ -44,7 +46,13 @@ module.exports = (sequelize, DataTypes) => {
       createdBy: DataTypes.INTEGER,
       brokerId: DataTypes.INTEGER,
       reservationType: {
-        type: DataTypes.ENUM("student", "medical"),
+        type: DataTypes.ENUM(
+          "student_male",
+          "student_female",
+          "medical_male",
+          "medical_female",
+          "customer"
+        ),
         allowNull: false,
       },
       paymentStatus: {
