@@ -44,4 +44,24 @@ function reservationTransformer(reservation) {
   };
 }
 
-module.exports = { userTransformer, reservationTransformer };
+function paymentTransformer(payment) {
+  if (!payment) return null;
+  return {
+    id: payment.id,
+    reservationId: payment.reservationId,
+    amount: payment.amount,
+    paymentDate: payment.paymentDate,
+    paymentMethod: payment.paymentMethod,
+    receivedBy: payment.receivedBy,
+    createdAt: payment.createdAt,
+    updatedAt: payment.updatedAt,
+    reservation: payment.reservation || undefined,
+    receivedByUser: payment.receivedByUser || undefined,
+  };
+}
+
+module.exports = {
+  userTransformer,
+  reservationTransformer,
+  paymentTransformer,
+};
