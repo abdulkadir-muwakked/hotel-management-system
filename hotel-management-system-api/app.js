@@ -1,23 +1,28 @@
-// app.js
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-// const bodyParser = require('body-parser'); // لو express قديم
-const routes = require("./routes"); // رح نعمل مجلد routes لاحقًا
+const routes = require("./routes");
+const path = require("path");
 
 const app = express();
 
 // Middlewares
 app.use(cors());
 app.use(morgan("dev"));
-app.use(express.json()); // بديل bodyParser.json()
-app.use(express.urlencoded({ extended: true })); // لتحليل الفورمات العادية
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ✅ تأكد من المسار المطلق للمجلد 'uploads'
+const uploadsPath = path.resolve(__dirname, "uploads");
+console.log("🚀 Serving static files from:", uploadsPath);
+
+// ✅ ملفات الرفع من مجلد uploads
+app.use("/uploads", express.static(uploadsPath));
 
 // Routes
-// const routes = require('./routes');
 app.use("/api", routes);
 
-// Error handler (بسيط)
+// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something broke!" });

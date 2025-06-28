@@ -52,5 +52,6 @@ router.delete(
   checkRole.isAdminReceptionistOrSelf,
   userFilesController.deleteDocument
 );
+router.get("/:id/avatar", isAuth, userFilesController.getAvatar);
 
 module.exports = router;

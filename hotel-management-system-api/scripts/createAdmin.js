@@ -16,7 +16,6 @@ async function createAdmin() {
       admin.username = "admin";
       admin.role = "admin";
       await admin.save();
-      console.log("✅ Admin updated:", admin.email);
     } else {
       admin = await User.create({
         username: "admin",
@@ -25,7 +24,6 @@ async function createAdmin() {
         role: "admin",
         isActive: true,
       });
-      console.log("✅ Admin created:", admin.email);
     }
   } catch (err) {
     console.error("❌ Failed to create/update admin:", err);

@@ -5,7 +5,8 @@ const multer = require("multer");
 const db = require("../models");
 const response = require("../helper/responses");
 
-// Multer storage for avatars
+// Multer storage for avatars filePath: `uploads/avatars/${req.file.filename}`
+
 const avatarStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "../uploads/avatars"));
@@ -55,7 +56,7 @@ exports.uploadAvatar = async (req, res) => {
       userId,
       documentType: "profile_photo",
       fileName: req.file.filename,
-      filePath: req.file.path,
+      filePath: `uploads/avatars/${req.file.filename}`,
     });
     return response.successWithMessage("Avatar uploaded", res, { avatar: doc });
   });
@@ -90,7 +91,7 @@ exports.uploadDocuments = async (req, res) => {
           userId,
           documentType: req.body.documentType || "other",
           fileName: file.filename,
-          filePath: file.path,
+          filePath: `uploads/documents/${file.filename}`,
         })
       )
     );
@@ -111,4 +112,20 @@ exports.deleteDocument = async (req, res) => {
   } catch {}
   await doc.destroy();
   return response.successWithMessage("Document deleted", res);
+};
+// GET /users/:id/avatar
+exports.getAvatar = async (req, res) => {
+  const userId = req.params.id;
+
+  const avatar = await db.Document.findOne({
+    where: { userId, documentType: "profile_photo" },
+  });
+
+  if (!avatar) {
+    return response.failedWithMessage("Avatar not found", res);
+  }
+
+  return response.successWithMessage("Avatar fetched", res, {
+    avatar,
+  });
 };

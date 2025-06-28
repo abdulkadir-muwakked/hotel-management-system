@@ -56,25 +56,26 @@ const getUser = async ({ userId: id }) => {
   try {
     const user = await db.User.findOne({
       where: { id },
-      //   include: [
-      //     {
-      //       model: db.Payment,
-      //       as: "receivedPayments",
-      //     },
-      //     {
-      //       model: db.Reservation,
-      //       as: "createdReservations",
-      //     },
-      //     {
-      //       model: db.Reservation,
-      //       as: "brokerReservations",
-      //     },
-      //     {
-      //       model: db.Reservation,
-      //       as: "reservations",
-      //       through: { attributes: [] },
-      //     },
-      //   ],
+      include: [
+        { model: db.Document, as: "documents" },
+        {
+          model: db.Payment,
+          as: "receivedPayments",
+        },
+        {
+          model: db.Reservation,
+          as: "createdReservations",
+        },
+        {
+          model: db.Reservation,
+          as: "brokerReservations",
+        },
+        {
+          model: db.Reservation,
+          as: "reservations",
+          through: { attributes: [] },
+        },
+      ],
     });
     return user;
   } catch (err) {
@@ -92,7 +93,29 @@ const getAllUsers = async ({ role }) => {
     }
     where.role = role;
   }
-  return db.User.findAll({ where });
+  return db.User.findAll({
+    where,
+    include: [
+      { model: db.Document, as: "documents" },
+      {
+        model: db.Payment,
+        as: "receivedPayments",
+      },
+      {
+        model: db.Reservation,
+        as: "createdReservations",
+      },
+      {
+        model: db.Reservation,
+        as: "brokerReservations",
+      },
+      {
+        model: db.Reservation,
+        as: "reservations",
+        through: { attributes: [] },
+      },
+    ],
+  });
 };
 const { User } = require("../models");
 

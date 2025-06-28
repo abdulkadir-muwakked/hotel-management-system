@@ -1,6 +1,38 @@
 // utils/transformers.js
+function avatarTransformer(avatar) {
+  if (!avatar) return null;
+  // Always use the relative filePath for the URL, stripping any absolute path
+  let url = null;
+  if (avatar.filePath) {
+    // If filePath is absolute, extract only the part after '/uploads/'
+    const match = avatar.filePath.match(/uploads\/avatars\/[^\\/]+$/i);
+    url = match ? `/uploads/avatars/${avatar.fileName}` : null;
+  }
+  return {
+    id: avatar.id,
+    url,
+    fileName: avatar.fileName,
+    uploadedAt: avatar.createdAt,
+  };
+}
+
+function documentTransformer(document) {
+  if (!document) return null;
+  return {
+    id: document.id,
+    name: document.name,
+    url: document.url,
+    fileName: document.fileName,
+    type: document.type,
+    uploadedAt: document.createdAt,
+  };
+}
+
 function userTransformer(user) {
   if (!user) return null;
+
+  const documents = user.Documents || [];
+
   return {
     id: user.id,
     username: user.username,
@@ -9,7 +41,13 @@ function userTransformer(user) {
     isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
-    // Add more fields as needed
+
+    avatar:
+      user.documents?.find((doc) => doc.documentType === "profile_photo") ||
+      null,
+
+    documents: documents.filter((doc) => doc.documentType !== "profile_photo"),
+
     receivedPayments: user.receivedPayments || [],
     createdReservations: user.createdReservations || [],
     brokerReservations: user.brokerReservations || [],
@@ -33,6 +71,7 @@ function reservationTransformer(reservation) {
     notes: reservation.notes,
     createdAt: reservation.createdAt,
     updatedAt: reservation.updatedAt,
+    documents: reservation.documents?.map(documentTransformer) || [],
     customers:
       reservation.customers?.map((user) => ({
         id: user.id,
@@ -40,6 +79,7 @@ function reservationTransformer(reservation) {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        avatar: avatarTransformer(user.avatar),
       })) || [],
   };
 }
@@ -64,4 +104,6 @@ module.exports = {
   userTransformer,
   reservationTransformer,
   paymentTransformer,
+  avatarTransformer,
+  documentTransformer,
 };

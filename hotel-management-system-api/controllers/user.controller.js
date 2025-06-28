@@ -46,6 +46,7 @@ const getUser = async (req, res, next) => {
     const user = await userService.getUser({ userId });
     if (!user)
       return response.failedWithMessage("failed to get user info", res);
+    // console.log("User documents:", user.documents);
     return response.successWithMessage("the User found successfully ", res, {
       user: transformers.userTransformer(user),
     });
