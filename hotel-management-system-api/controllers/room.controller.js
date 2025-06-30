@@ -1,14 +1,17 @@
 const response = require("../helper/responses");
 const roomService = require("../services/room.service");
+const { roomTransformer } = require("../utils/transformers");
 
 exports.getAllRooms = async (req, res) => {
   try {
     const rooms = await roomService.getAllRooms();
-    return response.successWithMessage("Rooms fetched successfully", res, {
-      rooms,
-    });
+    return response.successWithMessage(
+      "Rooms fetched",
+      res,
+      rooms.map(roomTransformer)
+    );
   } catch (err) {
-    return response.serverError(res);
+    return response.failedWithMessage(err.message, res);
   }
 };
 
@@ -16,11 +19,13 @@ exports.getRoomById = async (req, res) => {
   try {
     const room = await roomService.getRoomById(req.params.id);
     if (!room) return response.failedWithMessage("Room not found", res);
-    return response.successWithMessage("Room fetched successfully", res, {
-      room,
-    });
+    return response.successWithMessage(
+      "Room fetched",
+      res,
+      roomTransformer(room)
+    );
   } catch (err) {
-    return response.serverError(res);
+    return response.failedWithMessage(err.message, res);
   }
 };
 

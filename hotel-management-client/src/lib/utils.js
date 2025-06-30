@@ -4,8 +4,11 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+//≈ -------------------users---------------------------
 export async function login({ email, password }) {
-  const res = await fetch("http://localhost:3000/api/auth/login", {
+  const res = await fetch(`${BASE_URL}/api/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -32,7 +35,7 @@ export async function login({ email, password }) {
   }
 }
 export async function getAllUsers() {
-  const res = await fetch("http://localhost:3000/api/users/all", {
+  const res = await fetch(`${BASE_URL}/api/users/all`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -48,3 +51,64 @@ export async function getAllUsers() {
   console.log(data);
   return data;
 }
+//≈ -------------------users---------------------------
+
+//≈ -------------------rooms---------------------------
+export async function getAllRooms() {
+  const res = await fetch(`${BASE_URL}/api/rooms/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch rooms");
+  }
+
+  const data = await res.json();
+  console.log(data);
+  return data;
+}
+export async function createRoom(room) {
+  const res = await fetch(`${BASE_URL}/api/rooms/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(room),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create room");
+  return data;
+}
+export async function updateRoom(id, room) {
+  const res = await fetch(`${BASE_URL}/api/rooms/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(room),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update room");
+  return data;
+}
+export async function deleteRoom(id) {
+  const res = await fetch(`${BASE_URL}/api/rooms/${id}` , {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || "Failed to delete room");
+  }
+  return true;
+}
+//≈ -------------------rooms---------------------------

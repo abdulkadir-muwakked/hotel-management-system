@@ -72,15 +72,7 @@ function reservationTransformer(reservation) {
     createdAt: reservation.createdAt,
     updatedAt: reservation.updatedAt,
     documents: reservation.documents?.map(documentTransformer) || [],
-    customers:
-      reservation.customers?.map((user) => ({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        avatar: avatarTransformer(user.avatar),
-      })) || [],
+    customers: (reservation.customers || []).map(userTransformer) || [],
   };
 }
 
@@ -100,10 +92,68 @@ function paymentTransformer(payment) {
   };
 }
 
+function roomTransformer(room) {
+  if (!room) return null;
+  return {
+    id: room.id,
+    roomNumber: room.roomNumber,
+    capacity: room.capacity,
+    price: room.price,
+    description: room.description,
+    createdAt: room.createdAt,
+    updatedAt: room.updatedAt,
+    reservations: (room.reservations || []).map((reservation) => ({
+      id: reservation.id,
+      roomId: reservation.roomId,
+      reservationType: reservation.reservationType,
+      paymentStatus: reservation.paymentStatus,
+      checkIn: reservation.checkIn,
+      checkOut: reservation.checkOut,
+      paidAmount: reservation.paidAmount,
+      notes: reservation.notes,
+      createdAt: reservation.createdAt,
+      updatedAt: reservation.updatedAt,
+      createdByUser: reservation.createdByUser && {
+        id: reservation.createdByUser.id,
+        username: reservation.createdByUser.username,
+        email: reservation.createdByUser.email,
+        avatar:
+          avatarTransformer(
+            reservation.createdByUser.avatar ||
+              (reservation.createdByUser.documents || []).find(
+                (doc) => doc.documentType === "profile_photo"
+              )
+          ) || null,
+      },
+      broker: reservation.broker && {
+        id: reservation.broker.id,
+        username: reservation.broker.username,
+        email: reservation.broker.email,
+        avatar:
+          avatarTransformer(
+            reservation.broker.avatar ||
+              (reservation.broker.documents || []).find(
+                (doc) => doc.documentType === "profile_photo"
+              )
+          ) || null,
+      },
+      customers:
+        (reservation.customers || []).map((customer) =>
+          userTransformer({
+            ...customer,
+            documents: customer.documents || customer.Documents || [],
+          })
+        ) || [],
+      payments: (reservation.payments || []).map(paymentTransformer),
+    })),
+  };
+}
+
 module.exports = {
   userTransformer,
   reservationTransformer,
   paymentTransformer,
   avatarTransformer,
   documentTransformer,
+  roomTransformer,
 };

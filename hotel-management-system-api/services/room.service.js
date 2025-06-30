@@ -1,11 +1,61 @@
 const db = require("../models");
 
 exports.getAllRooms = async () => {
-  return db.Room.findAll();
+  return db.Room.findAll({
+    include: [
+      {
+        model: db.Reservation,
+        as: "reservations",
+        include: [
+          {
+            model: db.User,
+            as: "createdByUser",
+            include: [{ model: db.Document, as: "documents" }],
+          },
+          {
+            model: db.User,
+            as: "broker",
+            include: [{ model: db.Document, as: "documents" }],
+          },
+          {
+            model: db.User,
+            as: "customers",
+            through: { attributes: [] },
+            include: [{ model: db.Document, as: "documents" }],
+          },
+        ],
+      },
+    ],
+  });
 };
 
 exports.getRoomById = async (id) => {
-  return db.Room.findByPk(id);
+  return db.Room.findByPk(id, {
+    include: [
+      {
+        model: db.Reservation,
+        as: "reservations",
+        include: [
+          {
+            model: db.User,
+            as: "createdByUser",
+            include: [{ model: db.Document, as: "documents" }],
+          },
+          {
+            model: db.User,
+            as: "broker",
+            include: [{ model: db.Document, as: "documents" }],
+          },
+          {
+            model: db.User,
+            as: "customers",
+            through: { attributes: [] },
+            include: [{ model: db.Document, as: "documents" }],
+          },
+        ],
+      },
+    ],
+  });
 };
 
 exports.createRoom = async (data) => {

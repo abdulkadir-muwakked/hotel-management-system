@@ -1,6 +1,6 @@
 "use client";
+import { AppProvider } from "@/contexts/AuthContext";
 
-import { AuthProvider, UserProvider } from "../contexts/AuthContext";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {
@@ -24,13 +24,14 @@ const geistMono = Geist_Mono({
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   const isLoginPage = pathname === "/login";
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {isLoginPage ? (
-          <AuthProvider>{children}</AuthProvider>
+          <AppProvider>{children}</AppProvider>
         ) : (
           <SidebarProvider>
             <Sidebar>
@@ -38,9 +39,7 @@ export default function RootLayout({ children }) {
             </Sidebar>
             <main>
               <SidebarTrigger />
-              <AuthProvider>
-                <UserProvider>{children}</UserProvider>
-              </AuthProvider>
+              <AppProvider>{children}</AppProvider>
             </main>
           </SidebarProvider>
         )}
