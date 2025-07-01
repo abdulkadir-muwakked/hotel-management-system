@@ -37,8 +37,12 @@ function userTransformer(user) {
     id: user.id,
     username: user.username,
     email: user.email,
+    phone: user.phone,
+    address: user.address,
     role: user.role,
+    nationalId: user.nationalId,
     isActive: user.isActive,
+    notes: user.notes,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
 

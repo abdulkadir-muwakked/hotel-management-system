@@ -65,7 +65,9 @@ const getAllUsers = async (req, res, next) => {
     });
   } catch (err) {
     console.log("ERROR--> ", err);
-    return response.serverError(res);
+    return response.serverError(res, {
+      user: transformers.userTransformer(user),
+    });
   }
 };
 
@@ -82,6 +84,9 @@ const updateUser = async (req, res) => {
     const status = err.status || 500;
     res.status(status).json({ message: err.message || "Server error" });
   }
+  return response.serverError(res, {
+    user: transformers.userTransformer(user),
+  });
 };
 const deleteUser = async (req, res) => {
   const userId = req.params.id;
