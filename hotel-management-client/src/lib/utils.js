@@ -51,6 +51,65 @@ export async function getAllUsers() {
   console.log(data);
   return data;
 }
+export async function getUserById(id) {
+  const res = await fetch(`${BASE_URL}/api/users/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch user");
+  const data = await res.json();
+  return data.user || data.data || data;
+}
+
+export async function updateUser(id, user) {
+  console.log("user", JSON.stringify(user));
+
+  const res = await fetch(`${BASE_URL}/api/users/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(user),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update user");
+  return data;
+}
+
+export async function deleteUser(id) {
+  const res = await fetch(`${BASE_URL}/api/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || "Failed to delete user");
+  }
+  return true;
+}
+
+export async function uploadUserAvatar(id, file) {
+  const formData = new FormData();
+  formData.append("avatar", file);
+  const res = await fetch(`${BASE_URL}/api/users/${id}/avatar`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to upload avatar");
+  return data;
+}
+
 //≈ -------------------users---------------------------
 
 //≈ -------------------rooms---------------------------

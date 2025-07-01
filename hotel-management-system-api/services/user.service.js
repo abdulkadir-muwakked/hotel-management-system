@@ -134,7 +134,12 @@ const updateUser = async (userId, data, currentUser) => {
     isActive,
     notes,
   } = data;
-  const passwordHash = await bcrypt.hash(password, 10);
+
+  // فقط إذا فيه كلمة مرور جديدة
+  let passwordHash = user.passwordHash;
+  if (password) {
+    passwordHash = await bcrypt.hash(password, 10);
+  }
 
   // المستخدم العادي ما بيقدر يغير الدور
   const newRole =
@@ -156,6 +161,7 @@ const updateUser = async (userId, data, currentUser) => {
 
   return user;
 };
+
 const deleteUser = async (userId) => {
   const user = await User.findByPk(userId);
   if (!user) throw { status: 404, message: "User not found" };
