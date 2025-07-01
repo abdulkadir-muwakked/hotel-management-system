@@ -178,16 +178,39 @@ export default function RoomsTable() {
             </TableCell>
 
             <TableCell>
-              <Avatar>
-                <AvatarImage
-                //   src={`http://localhost:3000/${user?.avatar?.filePath}`}
-                />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
+              {room.reservations.length > 0 ? (
+                room.reservations.map((reservation) => (
+                  <div key={reservation.id}>{reservation.broker?.username}</div>
+                ))
+              ) : (
+                <div>No Broker Assigned</div>
+              )}
+            </TableCell>
+
+            <TableCell>
+              {/* Show state for the room based on reservations */}
+              <div>
+                {room.reservations && room.reservations.length > 0 ? (
+                  room.reservations.map((reservation) => (
+                    <Badge
+                      key={reservation.id}
+                      variant={
+                        reservation.paymentStatus === "paid"
+                          ? "default"
+                          : "outline"
+                      }
+                    >
+                      {reservation.paymentStatus || "unknown"}
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="text-gray-400">N/A</span>
+                )}
+              </div>
             </TableCell>
 
             <TableCell className="text-right">
-              <div className="flex gap-2 justify-end">
+              <div className="flex gap-1 justify-end">
                 <Button
                   size="sm"
                   variant="outline"

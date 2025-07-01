@@ -68,8 +68,8 @@ export async function getAllRooms() {
   }
 
   const data = await res.json();
-  console.log(data);
-  return data;
+  // Always return an array, even if undefined/null
+  return data.rooms || data.data || Array.isArray(data) ? data : [];
 }
 export async function createRoom(room) {
   const res = await fetch(`${BASE_URL}/api/rooms/`, {
@@ -98,7 +98,7 @@ export async function updateRoom(id, room) {
   return data;
 }
 export async function deleteRoom(id) {
-  const res = await fetch(`${BASE_URL}/api/rooms/${id}` , {
+  const res = await fetch(`${BASE_URL}/api/rooms/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -110,5 +110,20 @@ export async function deleteRoom(id) {
     throw new Error(data.message || "Failed to delete room");
   }
   return true;
+}
+export async function getRoomById(id) {
+  const res = await fetch(`${BASE_URL}/api/rooms/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error("Failed to fetch room");
+  }
+  const data = await res.json();
+  // Support both {room: {...}} and {data: {...}} and fallback
+  return data.room || data.data || data;
 }
 //≈ -------------------rooms---------------------------
