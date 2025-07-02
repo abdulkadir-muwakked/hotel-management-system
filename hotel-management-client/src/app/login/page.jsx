@@ -28,19 +28,17 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("from handlesubmit");
     setError("");
     setLoading(true);
-    console.log(email, e);
 
     try {
       const user = await loginRequest({ email, password });
       const token = localStorage.getItem("token");
-      if (token) {
-        login(token); // بدون `!`
+      if (token && user) {
+        login(token, user); // Pass both token and user!
         router.push("/dashboard");
       } else {
-        throw new Error("Token not found");
+        throw new Error("Token or user not found");
       }
     } catch (err) {
       setError(err.message || "Login failed");

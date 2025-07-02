@@ -53,10 +53,10 @@ export default function CreateUserPage() {
       const { avatar, ...userData } = form;
       const data = await createUser(userData); // createUser expects an object, not FormData
       // 2. If avatar present, upload it using uploadUserAvatar from utils
-      if (avatar && (data.user?.id || data.id)) {
-        // Support both {user: {id}} and {id}
-        const userId = data.user?.id || data.id;
-        await uploadUserAvatar(userId, avatar);
+
+      if (avatar && data.id) {
+        console.log("Uploading avatar for user:", avatar, data.id);
+        await uploadUserAvatar(data.id, avatar);
       }
       router.push("/users");
     } catch (err) {

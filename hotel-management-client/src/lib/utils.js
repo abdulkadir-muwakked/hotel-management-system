@@ -107,6 +107,21 @@ export async function uploadUserAvatar(id, file) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "Failed to upload avatar");
+  console.log("Avatar uploaded successfully:", data);
+  return data;
+}
+
+export async function createUser(userData) {
+  const res = await fetch(`${BASE_URL}/api/users/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(userData),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create user");
   return data;
 }
 
