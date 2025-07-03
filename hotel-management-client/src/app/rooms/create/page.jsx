@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createRoom } from "@/lib/utils";
+import { useRooms } from "@/contexts/AuthContext";
 
 export default function AddRoom() {
   const router = useRouter();
+  const { addRoom } = useRooms();
   const [form, setForm] = useState({
     roomNumber: "",
     capacity: "",
@@ -29,11 +31,12 @@ export default function AddRoom() {
     setLoading(true);
 
     try {
-      await createRoom({
+      const newRoom = await createRoom({
         ...form,
         capacity: Number(form.capacity),
         price: Number(form.price),
       });
+      addRoom(newRoom);
 
       router.push("/rooms"); // بعد النجاح بيرجعك لصفحة الغرف
     } catch (err) {

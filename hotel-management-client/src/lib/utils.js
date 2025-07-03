@@ -201,3 +201,49 @@ export async function getRoomById(id) {
   return data.room || data.data || data;
 }
 //≈ -------------------rooms---------------------------
+//≈ -------------------Reservations---------------------------
+export async function getAllReservations() {
+  const res = await fetch(`${BASE_URL}/api/reservations/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch reservations");
+  }
+
+  const data = await res.json();
+  return data.reservations || data.data || [];
+}
+
+export async function updateReservation(id, updates) {
+  const res = await fetch(`${BASE_URL}/api/reservations/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(updates),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update reservation");
+  return data;
+}
+export async function deleteReservation(id) {
+  const res = await fetch(`${BASE_URL}/api/reservations/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || "Failed to delete reservation");
+  }
+  return true;
+}
+//≈ -------------------Reservations---------------------------

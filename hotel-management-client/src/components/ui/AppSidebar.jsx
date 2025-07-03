@@ -111,8 +111,8 @@ export default function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              href="/guests"
-              isActive={pathname === "/guests"}
+              href="/Reservations"
+              isActive={pathname === "/Reservations"}
             >
               <a>
                 <span className="mr-2">
@@ -124,7 +124,7 @@ export default function AppSidebar() {
                     />
                   </svg>
                 </span>
-                Guests
+                Reservations
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

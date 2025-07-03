@@ -78,7 +78,8 @@ export default function RoomsTable() {
             <TableCell>
               <div className="flex flex-col items-center gap-2">
                 <div className="flex w-full flex-wrap gap-2">
-                  {room.reservations.length > 0 &&
+                  {Array.isArray(room.reservations) &&
+                  room.reservations.length > 0 ? (
                     room.reservations.map((reservation) => (
                       <Badge
                         key={reservation.id}
@@ -86,12 +87,17 @@ export default function RoomsTable() {
                       >
                         {reservation.reservationType}
                       </Badge>
-                    ))}
+                    ))
+                  ) : (
+                    <Badge variant="outline" className="text-gray-400">
+                      No reservations
+                    </Badge>
+                  )}
                 </div>
               </div>
             </TableCell>
             <TableCell>
-              {room.reservations.length > 0 &&
+              {Array.isArray(room.reservations) && room.reservations.length > 0 &&
                 room.reservations.map((reservation) => {
                   const checkIn = dayjs(reservation.checkIn);
                   const checkOut = dayjs(reservation.checkOut);
@@ -239,10 +245,7 @@ export default function RoomsTable() {
         ))}
       </TableBody>
       <TableFooter>
-        <TableRow>
-          <TableCell colSpan={3}>Total</TableCell>
-          <TableCell className="text-right">$2,500.00</TableCell>
-        </TableRow>
+        <TableRow></TableRow>
       </TableFooter>
     </Table>
   );

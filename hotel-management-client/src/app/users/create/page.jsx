@@ -1,5 +1,6 @@
 "use client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUsers } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ const ROLES = ["customer", "broker", "student", "doctor"];
 
 export default function CreateUserPage() {
   const { user: currentUser } = useAuth();
+  const { addUser } = useUsers();
   const router = useRouter();
   const [form, setForm] = useState({
     username: "",
@@ -53,11 +55,11 @@ export default function CreateUserPage() {
       const { avatar, ...userData } = form;
       const data = await createUser(userData); // createUser expects an object, not FormData
       // 2. If avatar present, upload it using uploadUserAvatar from utils
-
       if (avatar && data.id) {
-        console.log("Uploading avatar for user:", avatar, data.id);
         await uploadUserAvatar(data.id, avatar);
       }
+      // Add the new user to context for instant update
+      addUser({ ...data, avatar: data.avatar || avatar });
       router.push("/users");
     } catch (err) {
       setError(err.message || "Failed to create user");

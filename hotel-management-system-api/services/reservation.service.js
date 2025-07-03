@@ -1,18 +1,14 @@
 const db = require("../models");
 const { RESERVATION_TYPES, PAYMENT_STATUSES } = require("../utils/constants");
 
-exports.createReservation = async (data) => {
+async function validateReservationData(data, reservationId = null) {
   const {
     roomId,
-    createdBy,
-    brokerId,
     reservationType,
     checkIn,
     checkOut,
     paidAmount,
     paymentStatus,
-    notes,
-    customerIds = [],
   } = data;
 
   // تحقق من حالة الدفع إذا أُرسلت
@@ -31,6 +27,61 @@ exports.createReservation = async (data) => {
   if (new Date(checkOut) <= new Date(checkIn)) {
     throw new Error("Check-out date must be after check-in date");
   }
+
+  // تحقق من أن paidAmount رقم موجب
+  if (isNaN(Number(paidAmount)) || Number(paidAmount) <= 0) {
+    throw new Error("paidAmount must be a positive number");
+  }
+
+  // تحقق من أن الغرفة موجودة
+  const room = await db.Room.findByPk(roomId);
+  if (!room) {
+    throw new Error("Room not found");
+  }
+
+  // تحقق من عدم وجود حجز متداخل لنفس الغرفة (تجاهل الحجز الحالي عند التعديل)
+  const where = {
+    roomId,
+    [db.Sequelize.Op.or]: [
+      { checkIn: { [db.Sequelize.Op.between]: [checkIn, checkOut] } },
+      { checkOut: { [db.Sequelize.Op.between]: [checkIn, checkOut] } },
+      {
+        checkIn: { [db.Sequelize.Op.lte]: checkIn },
+        checkOut: { [db.Sequelize.Op.gte]: checkOut },
+      },
+    ],
+  };
+  if (reservationId) {
+    where.id = { [db.Sequelize.Op.ne]: reservationId };
+  }
+  const overlapping = await db.Reservation.findOne({ where });
+  if (overlapping) {
+    throw new Error("Room is not available for the selected date range");
+  }
+}
+
+exports.createReservation = async (data) => {
+  const {
+    roomId,
+    createdBy,
+    brokerId,
+    reservationType,
+    checkIn,
+    checkOut,
+    paidAmount,
+    paymentStatus,
+    notes,
+    customerIds = [],
+  } = data;
+
+  await validateReservationData({
+    roomId,
+    reservationType,
+    checkIn,
+    checkOut,
+    paidAmount,
+    paymentStatus,
+  });
 
   // إنشاء الحجز
   const reservation = await db.Reservation.create({
@@ -91,6 +142,14 @@ exports.getReservationById = async (id) => {
 exports.updateReservation = async (id, data) => {
   const reservation = await db.Reservation.findByPk(id);
   if (!reservation) return null;
+  await validateReservationData({
+    roomId: data.roomId ?? reservation.roomId,
+    reservationType: data.reservationType ?? reservation.reservationType,
+    checkIn: data.checkIn ?? reservation.checkIn,
+    checkOut: data.checkOut ?? reservation.checkOut,
+    paidAmount: data.paidAmount ?? reservation.paidAmount,
+    paymentStatus: data.paymentStatus ?? reservation.paymentStatus,
+  }, id);
   await reservation.update(data);
   return reservation;
 };

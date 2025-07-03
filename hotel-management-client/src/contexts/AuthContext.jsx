@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   getAllUsers,
   getAllRooms,
+  getAllReservations,
   createRoom as apiCreateRoom,
 } from "@/lib/utils";
 //---------------------------------- Auth Context
@@ -62,12 +63,17 @@ const UserProvider = ({ children }) => {
     }
   };
 
+  // Add this function to allow manual refresh after create
+  const addUser = (user) => {
+    setUsers((prev) => [user, ...prev]);
+  };
+
   useEffect(() => {
     fetchUsers();
   }, []);
 
   return (
-    <UserContext.Provider value={{ users, fetchUsers }}>
+    <UserContext.Provider value={{ users, fetchUsers, addUser }}>
       {children}
     </UserContext.Provider>
   );
@@ -89,28 +95,77 @@ const RoomProvider = ({ children }) => {
     }
   };
 
+  // Add this function to allow manual refresh after create
+  const addRoom = (room) => {
+    setRooms((prev) => [room, ...prev]);
+  };
+
   useEffect(() => {
     fetchRooms();
   }, []);
 
   return (
-    <RoomContext.Provider value={{ rooms, fetchRooms }}>
+    <RoomContext.Provider value={{ rooms, fetchRooms, addRoom }}>
       {children}
     </RoomContext.Provider>
   );
 };
 
 const useRooms = () => useContext(RoomContext);
+//-------------------- Reservations Context --------------------
+const ReservationsContext = createContext();
+
+export const ReservationsProvider = ({ children }) => {
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchReservations = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await getAllReservations();
+      setReservations(data.reservations || data.data || data || []);
+    } catch (err) {
+      setError(err.message || "Failed to fetch reservations");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReservations();
+  }, []);
+
+  return (
+    <ReservationsContext.Provider
+      value={{ reservations, fetchReservations, loading, error }}
+    >
+      {children}
+    </ReservationsContext.Provider>
+  );
+};
+
+const useReservations = () => useContext(ReservationsContext);
 
 //---------------------------------- App Provider
 const AppProvider = ({ children }) => {
   return (
     <AuthProvider>
       <UserProvider>
-        <RoomProvider>{children}</RoomProvider>
+        <RoomProvider>
+          <ReservationsProvider>{children}</ReservationsProvider>
+        </RoomProvider>
       </UserProvider>
     </AuthProvider>
   );
 };
 
-export { AuthProvider, AppProvider, useAuth, useUsers, useRooms };
+export {
+  AuthProvider,
+  AppProvider,
+  useAuth,
+  useUsers,
+  useRooms,
+  useReservations,
+};
