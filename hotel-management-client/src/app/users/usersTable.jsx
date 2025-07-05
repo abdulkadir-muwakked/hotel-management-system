@@ -18,7 +18,7 @@ import { deleteUser } from "@/lib/utils";
 
 // users;
 export default function UsersTable() {
-  const { users } = useUsers();
+  const { users, loading } = useUsers();
   const router = useRouter();
 
   const handleDelete = async (id) => {
@@ -30,6 +30,14 @@ export default function UsersTable() {
       alert(err.message || "Failed to delete user");
     }
   };
+
+  if (loading) {
+    return <div className="text-center text-gray-500">Loading...</div>;
+  }
+
+  if (!users || users.length === 0) {
+    return <div className="text-center text-gray-400">No users found.</div>;
+  }
 
   return (
     <Table>

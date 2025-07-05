@@ -3,8 +3,15 @@ const roomService = require("../services/room.service");
 const { roomTransformer } = require("../utils/transformers");
 
 exports.getAllRooms = async (req, res) => {
+  const { available, roomNumber, search, type } = req.query;
+
   try {
-    const rooms = await roomService.getAllRooms();
+    const rooms = await roomService.getAllRooms({
+      available,
+      roomNumber,
+      search,
+      type,
+    });
     return response.successWithMessage(
       "Rooms fetched",
       res,

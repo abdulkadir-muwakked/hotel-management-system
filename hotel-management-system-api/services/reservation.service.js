@@ -104,22 +104,96 @@ exports.createReservation = async (data) => {
   return reservation;
 };
 
-exports.getAllReservations = async () => {
-  return db.Reservation.findAll({
-    include: [
-      {
-        model: db.User,
-        as: "customers",
-        attributes: ["id", "username", "email", "phone"],
-        through: { attributes: [] }, // حتى ما يرجعلك جدول الوسيط
-      },
-      {
-        model: db.Room,
-        as: "room",
-        attributes: ["id", "roomNumber", "capacity", "price", "description"],
-      },
-    ],
-  });
+exports.getAllReservations = async (filters = {}) => {
+  const {
+    type,
+    fromDate,
+    toDate,
+    userId,
+    search,
+    status,
+    roomId,
+    customerId,
+    brokerId,
+    checkInFrom,
+    checkInTo,
+  } = filters;
+  const where = {};
+  if (type && type !== "all") {
+    where.reservationType = type;
+  }
+  if (status && status !== "all") {
+    where.paymentStatus = status;
+  }
+  if (roomId) {
+    where.roomId = roomId;
+  }
+  if (fromDate && toDate) {
+    where.checkIn = { [db.Sequelize.Op.gte]: fromDate };
+    where.checkOut = { [db.Sequelize.Op.lte]: toDate };
+  }
+  if (checkInFrom) {
+    where.checkIn = {
+      ...(where.checkIn || {}),
+      [db.Sequelize.Op.gte]: checkInFrom,
+    };
+  }
+  if (checkInTo) {
+    where.checkIn = {
+      ...(where.checkIn || {}),
+      [db.Sequelize.Op.lte]: checkInTo,
+    };
+  }
+  if (search) {
+    where.notes = { [db.Sequelize.Op.iLike]: `%${search}%` };
+  }
+  // Associated users
+  let include = [
+    {
+      model: db.User,
+      as: "customers",
+      attributes: ["id", "username", "email", "phone"],
+      through: { attributes: [] },
+      where: customerId ? { id: customerId } : undefined,
+      required: !!customerId,
+      include: [{ model: db.Document, as: "documents" }],
+    },
+    {
+      model: db.Room,
+      as: "room",
+      attributes: ["id", "roomNumber", "capacity", "price", "description"],
+    },
+    {
+      model: db.User,
+      as: "createdByUser",
+      include: [{ model: db.Document, as: "documents" }],
+    },
+    {
+      model: db.User,
+      as: "broker",
+      include: [{ model: db.Document, as: "documents" }],
+    },
+    {
+      model: db.Payment,
+      as: "payments",
+    },
+  ];
+  if (brokerId) {
+    include.push({
+      model: db.User,
+      as: "broker",
+      where: { id: brokerId },
+      required: true,
+      include: [{ model: db.Document, as: "documents" }],
+    });
+  }
+  if (userId) {
+    where[db.Sequelize.Op.or] = [
+      { createdBy: userId },
+      { brokerId: userId },
+    ];
+  }
+  return db.Reservation.findAll({ where, include });
 };
 
 exports.getReservationById = async (id) => {
@@ -142,14 +216,17 @@ exports.getReservationById = async (id) => {
 exports.updateReservation = async (id, data) => {
   const reservation = await db.Reservation.findByPk(id);
   if (!reservation) return null;
-  await validateReservationData({
-    roomId: data.roomId ?? reservation.roomId,
-    reservationType: data.reservationType ?? reservation.reservationType,
-    checkIn: data.checkIn ?? reservation.checkIn,
-    checkOut: data.checkOut ?? reservation.checkOut,
-    paidAmount: data.paidAmount ?? reservation.paidAmount,
-    paymentStatus: data.paymentStatus ?? reservation.paymentStatus,
-  }, id);
+  await validateReservationData(
+    {
+      roomId: data.roomId ?? reservation.roomId,
+      reservationType: data.reservationType ?? reservation.reservationType,
+      checkIn: data.checkIn ?? reservation.checkIn,
+      checkOut: data.checkOut ?? reservation.checkOut,
+      paidAmount: data.paidAmount ?? reservation.paidAmount,
+      paymentStatus: data.paymentStatus ?? reservation.paymentStatus,
+    },
+    id
+  );
   await reservation.update(data);
   return reservation;
 };

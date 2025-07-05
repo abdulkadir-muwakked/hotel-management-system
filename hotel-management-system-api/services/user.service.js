@@ -83,8 +83,10 @@ const getUser = async ({ userId: id }) => {
   }
 };
 
-const getAllUsers = async ({ role }) => {
+const getAllUsers = async ({ role, search }) => {
   const where = {};
+
+  // فلترة حسب الدور إذا مو "all"
   if (role && role !== "all") {
     if (!VALID_ROLES.includes(role)) {
       const error = new Error("Invalid role filter");
@@ -93,30 +95,45 @@ const getAllUsers = async ({ role }) => {
     }
     where.role = role;
   }
+
+  // فلترة حسب نص البحث
+  if (search) {
+    where[db.Sequelize.Op.or] = [
+      { username: { [db.Sequelize.Op.like]: `%${search}%` } },
+      { email: { [db.Sequelize.Op.like]: `%${search}%` } },
+      { phone: { [db.Sequelize.Op.like]: `%${search}%` } },
+    ];
+  }
+
+  // include للعلاقات
+  const include = [
+    { model: db.Document, as: "documents" },
+    {
+      model: db.Payment,
+      as: "receivedPayments",
+    },
+    {
+      model: db.Reservation,
+      as: "createdReservations",
+    },
+    {
+      model: db.Reservation,
+      as: "brokerReservations",
+    },
+    {
+      model: db.Reservation,
+      as: "reservations",
+      through: { attributes: [] },
+    },
+  ];
+
+  // الطلب الأساسي
   return db.User.findAll({
     where,
-    include: [
-      { model: db.Document, as: "documents" },
-      {
-        model: db.Payment,
-        as: "receivedPayments",
-      },
-      {
-        model: db.Reservation,
-        as: "createdReservations",
-      },
-      {
-        model: db.Reservation,
-        as: "brokerReservations",
-      },
-      {
-        model: db.Reservation,
-        as: "reservations",
-        through: { attributes: [] },
-      },
-    ],
+    include,
   });
 };
+
 const { User } = require("../models");
 
 const updateUser = async (userId, data, currentUser) => {

@@ -8,7 +8,8 @@ const roomController = require("../controllers/room.controller");
 router.use(isAuth);
 
 // GET /rooms - all users
-router.get("/", roomController.getAllRooms);
+router.get("/", isAuth, roomController.getAllRooms);
+
 // GET /rooms/:id - all users
 router.get("/:id", roomController.getRoomById);
 // POST /rooms - admin or receptionist only

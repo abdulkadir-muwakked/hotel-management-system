@@ -22,10 +22,17 @@ import { deleteRoom } from "@/lib/utils";
 import { useState } from "react";
 
 export default function RoomsTable() {
-  const { rooms } = useRooms();
-  console.log("Rooms:", rooms);
+  const { rooms, loading } = useRooms();
   const router = useRouter();
   const [deletingId, setDeletingId] = useState(null);
+
+  if (loading) {
+    return <div className="text-center text-gray-500">Loading...</div>;
+  }
+
+  if (!rooms || rooms.length === 0) {
+    return <div className="text-center text-gray-400">No rooms found.</div>;
+  }
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this room?")) return;
@@ -72,8 +79,17 @@ export default function RoomsTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {rooms.map((room) => (
-          <TableRow key={room.id}>
+        {console.log("Rooms:", rooms)}
+        {rooms.map((room, idx) => (
+          <TableRow
+            key={
+              room.id
+                ? `room-${room.id}`
+                : room.roomNumber
+                ? `roomnum-${room.roomNumber}`
+                : `idx-${idx}`
+            }
+          >
             <TableCell className="font-medium">{room.roomNumber}</TableCell>
             <TableCell>
               <div className="flex flex-col items-center gap-2">
@@ -97,7 +113,8 @@ export default function RoomsTable() {
               </div>
             </TableCell>
             <TableCell>
-              {Array.isArray(room.reservations) && room.reservations.length > 0 &&
+              {Array.isArray(room.reservations) &&
+                room.reservations.length > 0 &&
                 room.reservations.map((reservation) => {
                   const checkIn = dayjs(reservation.checkIn);
                   const checkOut = dayjs(reservation.checkOut);
@@ -120,19 +137,20 @@ export default function RoomsTable() {
             </TableCell>
             <TableCell>
               {(() => {
-                const relevantGuests = room.reservations.flatMap((r) =>
-                  [
-                    "student_male",
-                    "student_female",
-                    "medical_male",
-                    "medical_female",
-                  ].includes(r.reservationType)
-                    ? Array.isArray(r.customers)
-                      ? r.customers
-                      : []
-                    : []
-                );
-                console.log("Relevant Guests:", relevantGuests);
+                const relevantGuests = Array.isArray(room.reservations)
+                  ? room.reservations.flatMap((r) =>
+                      [
+                        "student_male",
+                        "student_female",
+                        "medical_male",
+                        "medical_female",
+                      ].includes(r.reservationType)
+                        ? Array.isArray(r.customers)
+                          ? r.customers
+                          : []
+                        : []
+                    )
+                  : [];
 
                 if (relevantGuests.length === 0) {
                   return (
@@ -184,7 +202,8 @@ export default function RoomsTable() {
             </TableCell>
 
             <TableCell>
-              {room.reservations.length > 0 ? (
+              {Array.isArray(room.reservations) &&
+              room.reservations.length > 0 ? (
                 room.reservations.map((reservation) => (
                   <div key={reservation.id}>{reservation.broker?.username}</div>
                 ))

@@ -58,16 +58,14 @@ const getUser = async (req, res, next) => {
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const role = req.query.role;
-    const users = await userService.getAllUsers({ role });
+    const { role, search } = req.query; // <-- add search
+    const users = await userService.getAllUsers({ role, search }); // <-- pass search
     return response.successWithMessage("users fetched successfully", res, {
       users: users.map(transformers.userTransformer),
     });
   } catch (err) {
     console.log("ERROR--> ", err);
-    return response.serverError(res, {
-      user: transformers.userTransformer(user),
-    });
+    return response.serverError(res);
   }
 };
 

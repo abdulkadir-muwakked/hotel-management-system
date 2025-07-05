@@ -53,13 +53,18 @@ const useAuth = () => useContext(AuthContext);
 const UserContext = createContext();
 const UserProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
+  const [userFilters, setUserFilters] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (filters = userFilters) => {
+    setLoading(true);
     try {
-      const data = await getAllUsers();
+      const data = await getAllUsers(filters);
       setUsers(data.data.users);
     } catch (err) {
       console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,10 +75,20 @@ const UserProvider = ({ children }) => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+    // eslint-disable-next-line
+  }, [userFilters]);
 
   return (
-    <UserContext.Provider value={{ users, fetchUsers, addUser }}>
+    <UserContext.Provider
+      value={{
+        users,
+        fetchUsers,
+        addUser,
+        userFilters,
+        setUserFilters,
+        loading,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
@@ -85,13 +100,18 @@ const useUsers = () => useContext(UserContext);
 const RoomContext = createContext();
 const RoomProvider = ({ children }) => {
   const [rooms, setRooms] = useState([]);
+  const [roomFilters, setRoomFilters] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  const fetchRooms = async () => {
+  const fetchRooms = async (filters = roomFilters) => {
+    setLoading(true);
     try {
-      const data = await getAllRooms();
-      setRooms(data?.data);
+      const data = await getAllRooms(filters);
+      setRooms(data);
     } catch (err) {
       console.error("Error fetching rooms:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,10 +122,20 @@ const RoomProvider = ({ children }) => {
 
   useEffect(() => {
     fetchRooms();
-  }, []);
+    // eslint-disable-next-line
+  }, [roomFilters]);
 
   return (
-    <RoomContext.Provider value={{ rooms, fetchRooms, addRoom }}>
+    <RoomContext.Provider
+      value={{
+        rooms,
+        fetchRooms,
+        addRoom,
+        roomFilters,
+        setRoomFilters,
+        loading,
+      }}
+    >
       {children}
     </RoomContext.Provider>
   );

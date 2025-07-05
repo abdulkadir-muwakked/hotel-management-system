@@ -34,8 +34,14 @@ export async function login({ email, password }) {
     return null;
   }
 }
-export async function getAllUsers() {
-  const res = await fetch(`${BASE_URL}/api/users/all`, {
+export async function getAllUsers(filters = {}) {
+  // Build query string from filters
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") params.append(key, value);
+  });
+  const query = params.toString() ? `?${params.toString()}` : "";
+  const res = await fetch(`${BASE_URL}/api/users/all${query}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -48,7 +54,7 @@ export async function getAllUsers() {
   }
 
   const data = await res.json();
-  console.log(data);
+  console.log(data, "from getAllUsers");
   return data;
 }
 export async function getUserById(id) {
@@ -128,8 +134,14 @@ export async function createUser(userData) {
 //≈ -------------------users---------------------------
 
 //≈ -------------------rooms---------------------------
-export async function getAllRooms() {
-  const res = await fetch(`${BASE_URL}/api/rooms/`, {
+export async function getAllRooms(filters = {}) {
+  // Build query string from filters
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") params.append(key, value);
+  });
+  const query = params.toString() ? `?${params.toString()}` : "";
+  const res = await fetch(`${BASE_URL}/api/rooms/${query}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -142,8 +154,9 @@ export async function getAllRooms() {
   }
 
   const data = await res.json();
+  console.log(data, "from getAllRooms");
   // Always return an array, even if undefined/null
-  return data.rooms || data.data || Array.isArray(data) ? data : [];
+  return data.rooms || data.data || (Array.isArray(data.data) ? data.data : []);
 }
 export async function createRoom(room) {
   const res = await fetch(`${BASE_URL}/api/rooms/`, {
@@ -216,6 +229,8 @@ export async function getAllReservations() {
   }
 
   const data = await res.json();
+  console.log(data, "from getAllReservations");
+
   return data.reservations || data.data || [];
 }
 
