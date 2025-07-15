@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
       capacity: DataTypes.INTEGER,
       price: DataTypes.DECIMAL,
       description: DataTypes.TEXT,
+      isClean: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+        allowNull: false,
+      },
     },
     {
       sequelize,

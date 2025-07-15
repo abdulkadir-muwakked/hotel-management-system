@@ -1,8 +1,11 @@
+"use client";
+
 import { useReservations } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import dayjs from "dayjs";
 import { Badge } from "@/components/ui/badge";
 import { deleteReservation } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 import {
   Table,
@@ -15,8 +18,45 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default function ReservationsTable() {
+export default function ReservationsTable({
+  search = "",
+  type = "",
+  fromDate = "",
+  toDate = "",
+}) {
   const { reservations, loading, error, fetchReservations } = useReservations();
+  const router = useRouter();
+
+  let filtered = reservations?.data?.reservations || reservations || [];
+  if (search) {
+    const s = search.toLowerCase();
+    filtered = filtered.filter(
+      (res) =>
+        (res.roomNumber && res.roomNumber.toString().includes(s)) ||
+        (res.reservationType &&
+          res.reservationType.toLowerCase().includes(s)) ||
+        (res.customers &&
+          res.customers.some((c) => c.username?.toLowerCase().includes(s))) ||
+        (res.broker && res.broker.username?.toLowerCase().includes(s))
+    );
+  }
+  if (type) {
+    filtered = filtered.filter((res) => res.reservationType === type);
+  }
+  if (fromDate) {
+    filtered = filtered.filter((res) => {
+      const checkIn = dayjs(res.checkIn);
+      const from = dayjs(fromDate);
+      return checkIn.valueOf() >= from.valueOf();
+    });
+  }
+  if (toDate) {
+    filtered = filtered.filter((res) => {
+      const checkOut = dayjs(res.checkOut);
+      const to = dayjs(toDate);
+      return checkOut.valueOf() <= to.valueOf();
+    });
+  }
 
   return (
     <Table>
@@ -44,7 +84,7 @@ export default function ReservationsTable() {
             </TableCell>
           </TableRow>
         ) : (
-          (reservations?.data?.reservations || reservations)?.map((res) => (
+          filtered.map((res) => (
             <TableRow key={res.id}>
               <TableCell>{res.roomId}</TableCell>
               <TableCell>
@@ -97,8 +137,20 @@ export default function ReservationsTable() {
                   : "-"}
               </TableCell>
               <TableCell>
-                <Button size="sm" variant="outline" onClick={() => {}} disabled>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => router.push(`/Reservations/${res.id}`)}
+                >
                   View
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="ml-2"
+                  onClick={() => router.push(`/Reservations/${res.id}/edit`)}
+                >
+                  Edit
                 </Button>
                 <Button
                   size="sm"

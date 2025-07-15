@@ -68,6 +68,10 @@ exports.getAllRooms = async ({ available, roomNumber, search, type }) => {
             new Date(res.checkOut) >= new Date()
         )
     );
+  } else if (available === "clean") {
+    rooms = rooms.filter((room) => room.isClean === true);
+  } else if (available === "dirty") {
+    rooms = rooms.filter((room) => room.isClean === false);
   }
 
   return rooms;

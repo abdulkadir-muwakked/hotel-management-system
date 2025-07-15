@@ -135,9 +135,14 @@ export async function createUser(userData) {
 
 //≈ -------------------rooms---------------------------
 export async function getAllRooms(filters = {}) {
-  // Build query string from filters
+  // Map frontend filter values to backend
+  const mappedFilters = { ...filters };
+  if (mappedFilters.available === "available") {
+    mappedFilters.available = "empty";
+  }
+  // "clean" and "dirty" are sent as-is
   const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
+  Object.entries(mappedFilters).forEach(([key, value]) => {
     if (value !== undefined && value !== "") params.append(key, value);
   });
   const query = params.toString() ? `?${params.toString()}` : "";
@@ -260,5 +265,18 @@ export async function deleteReservation(id) {
     throw new Error(data.message || "Failed to delete reservation");
   }
   return true;
+}
+export async function createReservation(reservation) {
+  const res = await fetch(`${BASE_URL}/api/reservations/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(reservation),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create reservation");
+  return data;
 }
 //≈ -------------------Reservations---------------------------

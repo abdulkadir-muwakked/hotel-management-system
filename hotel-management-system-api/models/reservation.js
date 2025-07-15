@@ -63,6 +63,16 @@ module.exports = (sequelize, DataTypes) => {
       checkOut: DataTypes.DATE,
       paidAmount: DataTypes.DECIMAL,
       notes: DataTypes.TEXT,
+      hasCheckedIn: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
+      hasCheckedOut: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
     },
     {
       sequelize,

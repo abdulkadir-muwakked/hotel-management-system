@@ -213,24 +213,44 @@ export default function RoomsTable() {
             </TableCell>
 
             <TableCell>
-              {/* Show state for the room based on reservations */}
-              <div>
-                {room.reservations && room.reservations.length > 0 ? (
-                  room.reservations.map((reservation) => (
-                    <Badge
-                      key={reservation.id}
-                      variant={
-                        reservation.paymentStatus === "paid"
-                          ? "default"
-                          : "outline"
-                      }
-                    >
-                      {reservation.paymentStatus || "unknown"}
-                    </Badge>
-                  ))
-                ) : (
-                  <span className="text-gray-400">N/A</span>
-                )}
+              <div className="flex gap-2 items-center">
+                <Badge
+                  variant={
+                    room.status === "occupied"
+                      ? "destructive"
+                      : room.status === "dirty"
+                      ? "secondary"
+                      : room.status === "clean"
+                      ? "success"
+                      : "default"
+                  }
+                  className={
+                    room.status === "clean"
+                      ? "bg-green-500 text-white"
+                      : room.status === "occupied"
+                      ? "bg-yellow-500 text-white"
+                      : room.status === "dirty"
+                      ? "bg-red-500 text-white"
+                      : ""
+                  }
+                >
+                  {room.status
+                    ? room.status.charAt(0).toUpperCase() + room.status.slice(1)
+                    : "Unknown"}
+                </Badge>
+                {/* Only show cleanliness badge if not clean status */}
+                {/* {room.status !== "clean" && (
+                  <Badge
+                    variant={room.isClean ? "success" : "outline"}
+                    className={
+                      room.isClean
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-100 text-gray-600"
+                    }
+                  >
+                    {room.isClean ? "Clean" : "Not Clean"}
+                  </Badge>
+                )} */}
               </div>
             </TableCell>
 

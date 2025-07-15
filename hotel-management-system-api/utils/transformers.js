@@ -73,10 +73,25 @@ function reservationTransformer(reservation) {
     paidAmount: reservation.paidAmount,
     paymentStatus: reservation.paymentStatus,
     notes: reservation.notes,
+    hasCheckedIn: reservation.hasCheckedIn,
+    hasCheckedOut: reservation.hasCheckedOut,
     createdAt: reservation.createdAt,
     updatedAt: reservation.updatedAt,
     documents: reservation.documents?.map(documentTransformer) || [],
     customers: (reservation.customers || []).map(userTransformer) || [],
+    room: reservation.room
+      ? {
+          id: reservation.room.id,
+          roomNumber: reservation.room.roomNumber,
+          capacity: reservation.room.capacity,
+          price: reservation.room.price,
+          description: reservation.room.description,
+          isClean: reservation.room.isClean,
+          status: reservation.room.status,
+          createdAt: reservation.room.createdAt,
+          updatedAt: reservation.room.updatedAt,
+        }
+      : undefined,
   };
 }
 
@@ -98,12 +113,23 @@ function paymentTransformer(payment) {
 
 function roomTransformer(room) {
   if (!room) return null;
+  const now = new Date();
+  const hasActiveReservation = (room.reservations || []).some(
+    (res) => new Date(res.checkIn) <= now && new Date(res.checkOut) >= now
+  );
+  const status = hasActiveReservation
+    ? "occupied"
+    : room.isClean
+    ? "clean"
+    : "dirty";
   return {
     id: room.id,
     roomNumber: room.roomNumber,
     capacity: room.capacity,
     price: room.price,
     description: room.description,
+    isClean: room.isClean,
+    status,
     createdAt: room.createdAt,
     updatedAt: room.updatedAt,
     reservations: (room.reservations || []).map((reservation) => ({
@@ -115,6 +141,8 @@ function roomTransformer(room) {
       checkOut: reservation.checkOut,
       paidAmount: reservation.paidAmount,
       notes: reservation.notes,
+      hasCheckedIn: reservation.hasCheckedIn,
+      hasCheckedOut: reservation.hasCheckedOut,
       createdAt: reservation.createdAt,
       updatedAt: reservation.updatedAt,
       createdByUser: reservation.createdByUser && {

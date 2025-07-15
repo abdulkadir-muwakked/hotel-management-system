@@ -188,10 +188,7 @@ exports.getAllReservations = async (filters = {}) => {
     });
   }
   if (userId) {
-    where[db.Sequelize.Op.or] = [
-      { createdBy: userId },
-      { brokerId: userId },
-    ];
+    where[db.Sequelize.Op.or] = [{ createdBy: userId }, { brokerId: userId }];
   }
   return db.Reservation.findAll({ where, include });
 };

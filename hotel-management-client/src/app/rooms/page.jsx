@@ -46,12 +46,9 @@ export default function Rooms() {
             placeholder="Search by number or description..."
             className="w-48"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          <Select
-            value={type}
-            onValueChange={val => setType(val)}
-          >
+          <Select value={type} onValueChange={(val) => setType(val)}>
             <option value="">All Types</option>
             <option value="student_male">Student Male</option>
             <option value="student_female">Student Female</option>
@@ -64,24 +61,21 @@ export default function Rooms() {
             placeholder="Min Price"
             className="w-24"
             value={minPrice}
-            onChange={e => setMinPrice(e.target.value)}
+            onChange={(e) => setMinPrice(e.target.value)}
           />
           <Input
             type="number"
             placeholder="Max Price"
             className="w-24"
             value={maxPrice}
-            onChange={e => setMaxPrice(e.target.value)}
+            onChange={(e) => setMaxPrice(e.target.value)}
           />
-          <Select
-            value={available}
-            onValueChange={val => setAvailable(val)}
-          >
+          <Select value={available} onValueChange={(val) => setAvailable(val)}>
             <option value="">All Statuses</option>
-            <option value="empty">Empty</option>
+            <option value="clean">Clean</option>
+            <option value="dirty">Dirty</option>
             <option value="occupied">Occupied</option>
-            <option value="true">Available</option>
-            <option value="false">Unavailable</option>
+            <option value="available">Available</option>
           </Select>
           <Button
             onClick={() => {

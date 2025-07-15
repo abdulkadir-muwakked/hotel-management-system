@@ -22,20 +22,39 @@ const createUser = async ({
   address,
   notes,
 }) => {
-  if (!password) {
-    throw new Error("Password is required");
+  // For admin/receptionist, require email and password
+  if (["admin", "receptionist"].includes(role)) {
+    if (!email) {
+      throw new Error("Email is required for admin/receptionist");
+    }
+    if (!password) {
+      throw new Error("Password is required for admin/receptionist");
+    }
   }
 
   if (!VALID_ROLES.includes(role)) {
     throw new Error("Invalid role");
   }
 
-  const existingUser = await db.User.findOne({ where: { email } });
-  if (existingUser) {
-    throw new Error("User already exists with this email");
+  // Username must be unique for all roles
+  const existingUsername = await db.User.findOne({ where: { username } });
+  if (existingUsername) {
+    throw new Error("Username already exists");
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  // Email must be unique if provided
+  if (email) {
+    const existingUser = await db.User.findOne({ where: { email } });
+    if (existingUser) {
+      throw new Error("User already exists with this email");
+    }
+  }
+
+  // Only hash password if provided
+  let passwordHash = null;
+  if (password) {
+    passwordHash = await bcrypt.hash(password, 10);
+  }
 
   const user = await db.User.create({
     username,

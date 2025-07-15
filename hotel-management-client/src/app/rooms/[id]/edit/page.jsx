@@ -99,6 +99,22 @@ export default function EditRoomPage() {
               onChange={handleChange}
             />
           </div>
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <select
+              id="status"
+              name="status"
+              value={room.status || ""}
+              onChange={(e) => setRoom({ ...room, status: e.target.value })}
+              className="w-full border rounded px-2 py-1"
+              required
+            >
+              <option value="">Select status</option>
+              {/* <option value="occupied">Occupied</option> */}
+              <option value="clean">Clean</option>
+              <option value="dirty">Dirty</option>
+            </select>
+          </div>
           {/* Show reservations info (read-only) */}
           <div>
             <h3 className="font-semibold mb-1">Reservations</h3>
@@ -139,8 +155,11 @@ export default function EditRoomPage() {
                       <span className="text-xs font-medium">Guests:</span>
                       {reservation.customers &&
                       reservation.customers.length > 0 ? (
-                        reservation.customers.map((guest) => (
-                          <Badge key={guest.id} variant="secondary">
+                        reservation.customers.map((guest, idx) => (
+                          <Badge
+                            key={guest.id || guest.email || idx}
+                            variant="secondary"
+                          >
                             {guest.username || guest.email}
                           </Badge>
                         ))
