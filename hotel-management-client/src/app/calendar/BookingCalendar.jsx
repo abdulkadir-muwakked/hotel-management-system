@@ -7,7 +7,12 @@ import dayjs from "dayjs";
 import { useAuth, useReservations, useRooms } from "@/contexts/AuthContext";
 import { updateReservation as apiUpdateReservation } from "@/lib/utils";
 
-const BookingCalendar = ({ search = "", type = "", fromDate = "", toDate = "" }) => {
+const BookingCalendar = ({
+  search = "",
+  type = "",
+  fromDate = "",
+  toDate = "",
+}) => {
   const { user } = useAuth();
   const { reservations, loading, error, fetchReservations } = useReservations();
   const { rooms } = useRooms();
@@ -47,21 +52,35 @@ const BookingCalendar = ({ search = "", type = "", fromDate = "", toDate = "" })
     if (search) {
       const s = search.toLowerCase();
       resList = resList.filter(
-        res =>
+        (res) =>
           (res.roomNumber && res.roomNumber.toString().includes(s)) ||
-          (res.reservationType && res.reservationType.toLowerCase().includes(s)) ||
-          (res.customers && res.customers.some(c => c.username?.toLowerCase().includes(s))) ||
+          (res.reservationType &&
+            res.reservationType.toLowerCase().includes(s)) ||
+          (res.customers &&
+            res.customers.some((c) => c.username?.toLowerCase().includes(s))) ||
           (res.broker && res.broker.username?.toLowerCase().includes(s))
       );
     }
     if (type) {
-      resList = resList.filter(res => res.reservationType === type);
+      resList = resList.filter((res) => res.reservationType === type);
     }
     if (fromDate) {
-      resList = resList.filter(res => dayjs(res.checkIn).isSameOrAfter(dayjs(fromDate)));
+      resList = resList.filter((res) => {
+        const checkIn = dayjs(res.checkIn);
+        const from = dayjs(fromDate);
+        // Use startOf('day') for both to avoid time issues
+        return (
+          checkIn.startOf("day").valueOf() >= from.startOf("day").valueOf()
+        );
+      });
     }
     if (toDate) {
-      resList = resList.filter(res => dayjs(res.checkOut).isSameOrBefore(dayjs(toDate)));
+      resList = resList.filter((res) => {
+        const checkOut = dayjs(res.checkOut);
+        const to = dayjs(toDate);
+        // Use endOf('day') for both to avoid time issues
+        return checkOut.endOf("day").valueOf() <= to.endOf("day").valueOf();
+      });
     }
     return resList.map((res) => ({
       id: res.id,

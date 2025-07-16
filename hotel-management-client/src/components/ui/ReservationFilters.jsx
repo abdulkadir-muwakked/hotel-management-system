@@ -1,6 +1,5 @@
-import Select from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import Input from "@/components/ui/input";
+import Button from "@/components/ui/button";
 
 export default function ReservationFilters({
   search,
@@ -14,7 +13,7 @@ export default function ReservationFilters({
   onAddReservation,
 }) {
   return (
-    <div className="flex flex-wrap gap-2 items-center">
+    <div className="reservation-filters-container">
       <Input
         type="text"
         placeholder="Search by room, customer, broker..."
@@ -22,14 +21,18 @@ export default function ReservationFilters({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <Select value={type} onValueChange={setType} className="w-48">
+      <select
+        value={type}
+        onChange={(e) => setType(e.target.value)}
+        className="w-48 border rounded-md p-2"
+      >
         <option value="">All Types</option>
         <option value="student_male">Student Male</option>
         <option value="student_female">Student Female</option>
         <option value="medical_male">Medical Male</option>
         <option value="medical_female">Medical Female</option>
         <option value="customer">Customer</option>
-      </Select>
+      </select>
       <Input
         type="date"
         value={fromDate}
