@@ -1,7 +1,12 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getUserById, updateUser, uploadUserAvatar } from "@/lib/utils";
+import {
+  getUserById,
+  updateUser,
+  uploadUserAvatar,
+  uploadUserDocuments,
+} from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -17,6 +22,10 @@ export default function EditUserPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const [userDocuments, setUserDocuments] = useState([]);
   const fileInputRef = useRef();
 
   useEffect(() => {
@@ -24,8 +33,10 @@ export default function EditUserPage() {
       setLoading(true);
       try {
         const found = await getUserById(userId);
-        // If API returns {user: {...}}, unwrap it
         setUser(found.user || found);
+        // If user has documents, set them
+        const docs = (found.user || found).documents || [];
+        setUserDocuments(docs);
       } catch (err) {
         setError("Failed to load user");
       } finally {
@@ -93,6 +104,21 @@ export default function EditUserPage() {
       setError(err.message || "Failed to upload avatar");
     } finally {
       setAvatarUploading(false);
+    }
+  };
+
+  const handleDocumentsChange = (e) => {
+    setDocuments(Array.from(e.target.files));
+  };
+
+  const handleUploadDocuments = async () => {
+    try {
+      await uploadUserDocuments(userId, documents);
+      setDocuments([]);
+    } catch (err) {
+      setUploadError(err.message || "Failed to upload documents");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -201,6 +227,78 @@ export default function EditUserPage() {
               />
             </div>
           )}
+          <div>
+            <label htmlFor="documents" className="block font-medium mb-1">
+              Upload Documents
+            </label>
+            {/* Show existing documents if any */}
+            {userDocuments.length > 0 && (
+              <div className="mb-2">
+                <div className="font-semibold text-sm mb-1">
+                  Existing Documents:
+                </div>
+                <ul className="list-disc pl-5">
+                  {userDocuments.map((doc, idx) => {
+                    const fileUrl = `http://localhost:3000/${doc.filePath}`;
+                    const fileName =
+                      doc.fileName ||
+                      doc.originalname ||
+                      doc.name ||
+                      `Document ${idx + 1}`;
+                    const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(
+                      fileUrl
+                    );
+                    return (
+                      <li key={doc._id || doc.id || idx} className="mb-2">
+                        {isImage ? (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <img
+                              src={fileUrl}
+                              alt={fileName}
+                              className="max-h-32 rounded shadow border mb-1"
+                              style={{ maxWidth: "100%", objectFit: "contain" }}
+                            />
+                          </a>
+                        ) : (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            {fileName}
+                          </a>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+            <input
+              id="documents"
+              name="documents"
+              type="file"
+              multiple
+              onChange={handleDocumentsChange}
+              className="w-full border rounded px-2 py-2 mb-2"
+            />
+            <Button
+              type="button"
+              className="mt-2"
+              onClick={handleUploadDocuments}
+              disabled={uploading || !documents.length}
+            >
+              {uploading ? "Uploading..." : "Upload Documents"}
+            </Button>
+            {uploadError && (
+              <div className="text-red-500 text-sm mt-2">{uploadError}</div>
+            )}
+          </div>
           {error && <div className="text-red-500 text-sm">{error}</div>}
           <div className="flex gap-2">
             <Button type="submit" disabled={saving}>

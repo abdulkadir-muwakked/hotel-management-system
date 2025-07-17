@@ -131,6 +131,23 @@ export async function createUser(userData) {
   return data;
 }
 
+export async function uploadUserDocuments(userId, documents) {
+  if (!documents.length) return;
+  const formData = new FormData();
+  documents.forEach((file) => formData.append("documents", file));
+  const res = await fetch(
+    `${BASE_URL}/api/users/${userId}/documents`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: formData,
+    }
+  );
+  if (!res.ok) throw new Error("Failed to upload documents");
+  return await res.json();
+}
 //≈ -------------------users---------------------------
 
 //≈ -------------------rooms---------------------------

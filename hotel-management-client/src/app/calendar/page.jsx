@@ -15,7 +15,7 @@ export default function Reservations() {
 
   // Example: Implement onAddReservation
   const onAddReservation = () => {
-    router.push("/reservations/new"); // or open a modal, etc.
+    router.push("/Reservations/create"); // or open a modal, etc.
   };
 
   return (

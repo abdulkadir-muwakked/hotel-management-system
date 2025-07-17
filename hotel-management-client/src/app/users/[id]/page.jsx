@@ -14,14 +14,17 @@ export default function UserViewPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [userDocuments, setUserDocuments] = useState([]);
 
   useEffect(() => {
     async function fetchUser() {
       setLoading(true);
       try {
         const found = await getUserById(userId);
-        // If API returns {user: {...}}, unwrap it
         setUser(found.user || found);
+        // If user has documents, set them
+        const docs = (found.user || found).documents || [];
+        setUserDocuments(docs);
       } catch (err) {
         setError("Failed to load user");
       } finally {
@@ -54,13 +57,61 @@ export default function UserViewPage() {
         </div>
         <div className="mb-2 text-gray-700">Email: {u.email}</div>
         <div className="mb-2 text-gray-700">Phone: {u.phone || "-"}</div>
-        <div className="mb-2 text-gray-700">National ID: {u.nationalId || "-"}</div>
+        <div className="mb-2 text-gray-700">
+          National ID: {u.nationalId || "-"}
+        </div>
         <div className="mb-2 text-gray-700">Address: {u.address || "-"}</div>
         <div className="mb-2 text-gray-700">Notes: {u.notes || "-"}</div>
-        <div className="mb-2 text-gray-700">Active: {u.isActive === true ? "Yes" : u.isActive === false ? "No" : "-"}</div>
+        <div className="mb-2 text-gray-700">
+          Active:{" "}
+          {u.isActive === true ? "Yes" : u.isActive === false ? "No" : "-"}
+        </div>
         <div className="mb-2 text-gray-700">
           Created: {u.createdAt ? new Date(u.createdAt).toLocaleString() : "-"}
         </div>
+        {/* Show existing documents if any */}
+        {userDocuments.length > 0 && (
+          <div className="mb-4">
+            <div className="font-semibold text-sm mb-1">Documents:</div>
+            <ul className="list-disc pl-5">
+              {userDocuments.map((doc, idx) => {
+                const fileUrl = `http://localhost:3000/${doc.filePath}`;
+                const fileName =
+                  doc.originalname || doc.name || `Document ${idx + 1}`;
+                const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(
+                  fileUrl
+                );
+                return (
+                  <li key={doc._id || doc.id || idx} className="mb-2">
+                    {isImage ? (
+                      <a
+                        href={fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={fileUrl}
+                          alt={fileName}
+                          className="max-h-32 rounded shadow border mb-1"
+                          style={{ maxWidth: "100%", objectFit: "contain" }}
+                        />
+                      </a>
+                    ) : (
+                      <a
+                        href={fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline"
+                      >
+                        {fileName}
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
         <Button variant="outline" onClick={() => router.push("/users")}>
           Back to Users
         </Button>

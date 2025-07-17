@@ -9,6 +9,9 @@ export default function Reservations() {
   const [type, setType] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const onAddReservation = () => {
+    router.push("/Reservations/create"); // or open a modal, etc.
+  };
 
   return (
     <div className="p-4 space-y-6">
@@ -28,6 +31,7 @@ export default function Reservations() {
           setFromDate={setFromDate}
           toDate={toDate}
           setToDate={setToDate}
+          onAddReservation={onAddReservation}
         />
       </div>
 

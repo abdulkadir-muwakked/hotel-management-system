@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { uploadUserAvatar, createUser } from "@/lib/utils";
+import { uploadUserAvatar, createUser, uploadUserDocuments } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 const ROLES = ["customer", "broker", "student", "doctor"];
@@ -28,6 +28,8 @@ export default function CreateUserPage() {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  const [createdUserId, setCreatedUserId] = useState(null);
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -46,10 +48,20 @@ export default function CreateUserPage() {
     }
   };
 
+  const handleUploadDocuments = async (userId, docs) => {
+    try {
+      await uploadUserDocuments(userId, docs);
+      // Optionally: show success message or update user context
+    } catch (err) {
+      setError(err.message || "Failed to upload documents");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    let docs = documents;
     try {
       // 1. Submit user as JSON (without avatar) using createUser from utils
       const { avatar, ...userData } = form;
@@ -58,8 +70,18 @@ export default function CreateUserPage() {
       if (avatar && data.id) {
         await uploadUserAvatar(data.id, avatar);
       }
+      // 3. If documents were selected in the file input, get them here
+      const docsInput = document.getElementById("documents");
+      if (docsInput && docsInput.files.length) {
+        docs = Array.from(docsInput.files);
+      }
+      // 4. Upload documents if present
+      if (docs.length && data.id) {
+        await handleUploadDocuments(data.id, docs);
+      }
       // Add the new user to context for instant update
       addUser({ ...data, avatar: data.avatar || avatar });
+      setCreatedUserId(data.id); // Save for further actions
       router.push("/users");
     } catch (err) {
       setError(err.message || "Failed to create user");
@@ -199,6 +221,16 @@ export default function CreateUserPage() {
               className="hidden"
             />
           </div>
+        </div>
+        <div>
+          <Label htmlFor="documents">Documents</Label>
+          <input
+            id="documents"
+            name="documents"
+            type="file"
+            multiple
+            className="w-full border rounded px-2 py-2 mb-2"
+          />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Creating..." : "Create User"}

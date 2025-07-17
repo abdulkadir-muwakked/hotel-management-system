@@ -31,7 +31,8 @@ function documentTransformer(document) {
 function userTransformer(user) {
   if (!user) return null;
 
-  const documents = user.Documents || [];
+  // Prefer user.documents, fallback to user.Documents
+  const documents = user.documents || user.Documents || [];
 
   return {
     id: user.id,
@@ -47,8 +48,7 @@ function userTransformer(user) {
     updatedAt: user.updatedAt,
 
     avatar:
-      user.documents?.find((doc) => doc.documentType === "profile_photo") ||
-      null,
+      documents.find((doc) => doc.documentType === "profile_photo") || null,
 
     documents: documents.filter((doc) => doc.documentType !== "profile_photo"),
 
