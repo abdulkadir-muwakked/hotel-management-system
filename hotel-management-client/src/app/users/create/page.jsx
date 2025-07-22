@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 
 const ROLES = ["customer", "broker", "student", "doctor"];
 
-export default function CreateUserPage() {
+export default function CreateUserPage({ onCreated }) {
   const { user: currentUser } = useAuth();
   const { addUser } = useUsers();
   const router = useRouter();
@@ -82,7 +82,11 @@ export default function CreateUserPage() {
       // Add the new user to context for instant update
       addUser({ ...data, avatar: data.avatar || avatar });
       setCreatedUserId(data.id); // Save for further actions
-      router.push("/users");
+      if (typeof onCreated === "function") {
+        onCreated(data); // أبعت اليوزر الجديد للصفحة الأم (مثل الحجز)
+      } else {
+        router.push("/users"); // الحالة العادية
+      }
     } catch (err) {
       setError(err.message || "Failed to create user");
     } finally {
@@ -231,6 +235,30 @@ export default function CreateUserPage() {
             multiple
             className="w-full border rounded px-2 py-2 mb-2"
           />
+          {/* Preview selected images before submit */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {Array.from(document.getElementById("documents")?.files || []).map(
+              (file, idx) => {
+                const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(
+                  file.name
+                );
+                if (isImage) {
+                  const url = URL.createObjectURL(file);
+                  return (
+                    <img
+                      key={idx}
+                      src={url}
+                      alt={file.name}
+                      className="max-h-24 rounded border shadow"
+                      style={{ maxWidth: "100px", objectFit: "contain" }}
+                      onLoad={() => URL.revokeObjectURL(url)}
+                    />
+                  );
+                }
+                return null;
+              }
+            )}
+          </div>
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? "Creating..." : "Create User"}

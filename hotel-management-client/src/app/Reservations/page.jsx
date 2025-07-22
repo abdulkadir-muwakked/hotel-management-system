@@ -3,12 +3,15 @@
 import ReservationHeader from "@/components/ui/ReservationHeader";
 import { useState } from "react";
 import ReservationsTable from "./ReservationsTable";
+import { useRouter } from "next/navigation";
 
 export default function Reservations() {
   const [search, setSearch] = useState("");
   const [type, setType] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const router = useRouter();
+
   const onAddReservation = () => {
     router.push("/Reservations/create"); // or open a modal, etc.
   };

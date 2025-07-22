@@ -7,7 +7,8 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
-import CreateUserPage from "@/app/users/creat/page";
+import CreateUserPage from "@/app/users/create/page";
+import { Label } from "@/components/ui/label";
 
 // Dummy API functions (replace with real ones)
 import {
@@ -91,9 +92,17 @@ function CreateCustomerForm({ initialName, onCreated }) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [documentsPreview, setDocumentsPreview] = useState([]);
+  const [documents, setDocuments] = useState([]);
 
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleDocumentsChange = (e) => {
+    const files = Array.from(e.target.files);
+    setDocumentsPreview(files);
+    setDocuments(files);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -102,7 +111,13 @@ function CreateCustomerForm({ initialName, onCreated }) {
     try {
       if (!form.email) throw new Error("Email is required");
       if (!form.password) throw new Error("Password is required");
+      // Create user
       const user = await createUser(form);
+      // Upload documents if any
+      if (documents.length && user.data?.user?.id) {
+        await uploadUserDocuments(user.data.user.id, documents);
+      }
+      // Instead of redirect, just call onCreated
       onCreated(user.data?.user || user.user || user);
     } catch (err) {
       setError(err.message);
@@ -145,6 +160,39 @@ function CreateCustomerForm({ initialName, onCreated }) {
         onChange={handleChange}
         required
       />
+      <div>
+        <Label htmlFor="documents">Documents</Label>
+        <input
+          id="documents"
+          name="documents"
+          type="file"
+          multiple
+          className="w-full border rounded px-2 py-2 mb-2"
+          onChange={handleDocumentsChange}
+        />
+        {/* Preview selected images before submit */}
+        <div className="flex flex-wrap gap-2 mt-2">
+          {documentsPreview.map((file, idx) => {
+            const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(
+              file.name
+            );
+            if (isImage) {
+              const url = URL.createObjectURL(file);
+              return (
+                <img
+                  key={idx}
+                  src={url}
+                  alt={file.name}
+                  className="max-h-24 rounded border shadow"
+                  style={{ maxWidth: "100px", objectFit: "contain" }}
+                  onLoad={() => URL.revokeObjectURL(url)}
+                />
+              );
+            }
+            return null;
+          })}
+        </div>
+      </div>
       {error && <div className="text-red-500 text-sm">{error}</div>}
       <Button type="submit" disabled={loading}>
         {loading ? "Creating..." : "Create & Select"}
@@ -160,6 +208,7 @@ export default function CreateReservationPage() {
   const [createName, setCreateName] = useState("");
   const [brokers, setBrokers] = useState([]);
   const [rooms, setRooms] = useState([]);
+  const [documentsPreview, setDocumentsPreview] = useState([]);
   const [form, setForm] = useState({
     roomId: "",
     brokerId: "",
@@ -196,6 +245,11 @@ export default function CreateReservationPage() {
   const handleCustomerCreated = (user) => {
     setSelectedCustomer(user);
     setShowCreateForm(false);
+  };
+
+  const handleDocumentsChange = (e) => {
+    const files = Array.from(e.target.files);
+    setDocumentsPreview(files);
   };
 
   const handleSubmit = async (e) => {
@@ -334,6 +388,7 @@ export default function CreateReservationPage() {
           value={form.notes}
           onChange={handleFormChange}
         />
+
         {error && <div className="text-red-500 text-sm">{error}</div>}
         {success && <div className="text-green-600 text-sm">{success}</div>}
         <Button type="submit" disabled={submitting} className="w-full">
