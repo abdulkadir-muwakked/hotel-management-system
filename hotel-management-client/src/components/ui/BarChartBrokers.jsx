@@ -20,7 +20,13 @@ ChartJS.register(
   Legend
 );
 
-export default function BarChartBrokers({ labels, data, title }) {
+export default function BarChartBrokers({
+  labels,
+  data,
+  title,
+  noDataMessage = "No data to display",
+}) {
+  const hasData = Array.isArray(data) && data.some((v) => v > 0);
   const chartData = {
     labels,
     datasets: [
@@ -31,7 +37,6 @@ export default function BarChartBrokers({ labels, data, title }) {
       },
     ],
   };
-
   const options = {
     responsive: true,
     plugins: {
@@ -46,11 +51,14 @@ export default function BarChartBrokers({ labels, data, title }) {
       },
     },
   };
-  console.log("BarChart labels:", labels);
-  console.log("BarChart data:", data);
+
   return (
     <Card className="p-4">
-      <Bar data={chartData} options={options} />
+      {hasData ? (
+        <Bar data={chartData} options={options} />
+      ) : (
+        <div className="text-center text-gray-400 py-8">{noDataMessage}</div>
+      )}
     </Card>
   );
 }

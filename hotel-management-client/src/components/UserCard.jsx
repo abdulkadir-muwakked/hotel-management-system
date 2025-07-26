@@ -1,4 +1,4 @@
-// app/(dashboard)/users/_components/UserCard.jsx
+// ✅ app/(dashboard)/users/_components/UserCard.jsx
 "use client";
 
 import React from "react";
@@ -9,7 +9,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function UserCard({ user }) {
   if (!user) return <div>User not found</div>;
-  // Unwrap if still nested
   const u = user.user || user;
   const userDocuments = u.documents || [];
 
@@ -33,7 +32,7 @@ export default function UserCard({ user }) {
           {u.role && <Badge>{u.role}</Badge>}
         </div>
       </div>
-      <div className="mb-2 text-gray-700">Email: {u.email}</div>
+      <div className="mb-2 text-gray-700">Email: {u.email || "-"}</div>
       <div className="mb-2 text-gray-700">Phone: {u.phone || "-"}</div>
       <div className="mb-2 text-gray-700">
         National ID: {u.nationalId || "-"}
@@ -47,7 +46,6 @@ export default function UserCard({ user }) {
       <div className="mb-2 text-gray-700">
         Created: {u.createdAt ? new Date(u.createdAt).toLocaleString() : "-"}
       </div>
-      {/* Show existing documents if any */}
       {userDocuments.length > 0 && (
         <div className="mb-4">
           <div className="font-semibold text-sm mb-1">Documents:</div>

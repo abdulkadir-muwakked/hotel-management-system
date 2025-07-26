@@ -1,3 +1,4 @@
+// src/app/dashboard/page.jsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -22,6 +23,7 @@ import {
 import dayjs from "dayjs";
 import PieChartWithLegend from "@/components/ui/PieChartWithLegend";
 import BarChartBrokers from "@/components/ui/BarChartBrokers";
+import Link from "next/link";
 
 function ReservationList({
   title,
@@ -54,41 +56,32 @@ function ReservationList({
               </TableCell>
             </TableRow>
           ) : (
-            reservations.map(
-              (r) => (
-                console.log(r),
-                (
-                  <TableRow key={r.id}>
-                    <TableCell>
-                      {r.customers?.[0]?.username ||
-                        r.customers?.[0]?.email ||
-                        "-"}
-                    </TableCell>
-                    <TableCell>{r.room?.roomNumber || "-"}</TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        disabled={!!r[actionField]}
-                        onClick={() => onAction(r)}
-                      >
-                        {!!r[actionField] ? "Marked" : actionLabel}
+            reservations.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell>
+                  {r.customers?.[0]?.username || r.customers?.[0]?.email || "-"}
+                </TableCell>
+                <TableCell>{r.room?.roomNumber || "-"}</TableCell>
+                <TableCell>
+                  <Button
+                    size="sm"
+                    disabled={!!r[actionField]}
+                    onClick={() => onAction(r)}
+                  >
+                    {!!r[actionField] ? "Marked" : actionLabel}
+                  </Button>
+                </TableCell>
+                {viewLinkField && (
+                  <TableCell>
+                    <Link href={`/Reservations/${r.id}`}>
+                      <Button size="sm" variant="outline">
+                        View
                       </Button>
-                    </TableCell>
-                    {viewLinkField && (
-                      <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          href={`/Reservations/${r.id}`}
-                        >
-                          View
-                        </Button>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                )
-              )
-            )
+                    </Link>
+                  </TableCell>
+                )}
+              </TableRow>
+            ))
           )}
         </TableBody>
       </Table>
@@ -170,9 +163,17 @@ export default function DashboardPage() {
           brokersMap[b.id] = b;
         });
         setBrokersLookup(brokersMap);
-        const reservationsRaw = resData.data?.reservations || resData.reservations || resData;
+        const reservationsRaw =
+          resData.data?.reservations || resData.reservations || resData;
         setReservations(reservationsRaw);
         setRooms(roomData.data?.rooms || roomData.rooms || roomData);
+        // Debug logs
+        console.log("[Dashboard] reservationsRaw:", reservationsRaw);
+        console.log(
+          "[Dashboard] rooms:",
+          roomData.data?.rooms || roomData.rooms || roomData
+        );
+        console.log("[Dashboard] brokersArr:", brokersArr);
       } catch (err) {
         setError(err.message || "Failed to load dashboard data");
       } finally {
@@ -233,10 +234,14 @@ export default function DashboardPage() {
   const oneYearAgo = dayjs().subtract(1, "year");
   const brokersCount = {};
   reservations.forEach((r) => {
-    if (r.brokerId && r.checkIn && dayjs(r.checkIn).isAfter(oneYearAgo)) {
-      const broker = brokersLookup[r.brokerId];
-      const brokerName = broker ? broker.username || broker.email : `Broker #${r.brokerId}`;
-      brokersCount[brokerName] = (brokersCount[brokerName] || 0) + (r.customers?.length || 1);
+    const brokerId = r.brokerId || r.broker?.id;
+    if (brokerId && r.checkIn && dayjs(r.checkIn).isAfter(oneYearAgo)) {
+      const broker = brokersLookup[brokerId];
+      const brokerName = broker
+        ? broker.username || broker.email
+        : `Broker #${brokerId}`;
+      brokersCount[brokerName] =
+        (brokersCount[brokerName] || 0) + (r.customers?.length || 1);
     }
   });
   const barLabels = Object.keys(brokersCount);
@@ -305,7 +310,13 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <PieChartWithLegend
           data={pieData}
-          labels={["Vacant Rooms", "Rented Rooms", "Students", "Medical", "Customers"]}
+          labels={[
+            "Vacant Rooms",
+            "Rented Rooms",
+            "Students",
+            "Medical",
+            "Customers",
+          ]}
           title="Rooms & Customers Statistics"
         />
         <BarChartBrokers
