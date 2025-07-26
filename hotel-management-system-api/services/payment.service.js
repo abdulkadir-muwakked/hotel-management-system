@@ -37,17 +37,42 @@ async function createPayment(data) {
 }
 
 async function getAllPayments() {
-  return Payment.findAll({ include: ["reservation", "receivedByUser"] });
+  return Payment.findAll({
+    include: [
+      { model: Reservation, as: "reservation" },
+      {
+        model: User,
+        as: "receivedByUser",
+        include: [{ association: "documents" }],
+      },
+    ],
+  });
 }
 
 async function getPaymentById(id) {
-  return Payment.findByPk(id, { include: ["reservation", "receivedByUser"] });
+  return Payment.findByPk(id, {
+    include: [
+      { model: Reservation, as: "reservation" },
+      {
+        model: User,
+        as: "receivedByUser",
+        include: [{ association: "documents" }],
+      },
+    ],
+  });
 }
 
 async function getPaymentsByReservation(reservationId) {
   return Payment.findAll({
     where: { reservationId },
-    include: ["reservation", "receivedByUser"],
+    include: [
+      { model: Reservation, as: "reservation" },
+      {
+        model: User,
+        as: "receivedByUser",
+        include: [{ association: "documents" }],
+      },
+    ],
   });
 }
 

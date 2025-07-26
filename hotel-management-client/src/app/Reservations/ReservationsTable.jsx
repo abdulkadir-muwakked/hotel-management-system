@@ -28,6 +28,8 @@ export default function ReservationsTable({
   const router = useRouter();
 
   let filtered = reservations?.data?.reservations || reservations || [];
+  console.log("Filtered Reservations:", filtered);
+
   if (search) {
     const s = search.toLowerCase();
     filtered = filtered.filter(

@@ -62,23 +62,38 @@ function userTransformer(user) {
 function reservationTransformer(reservation) {
   if (!reservation) return null;
 
+  // Calculate paidAmount from payments
+  const paidAmount = Array.isArray(reservation.payments)
+    ? reservation.payments.reduce((sum, p) => sum + Number(p.amount || 0), 0)
+    : 0;
+  const remainingAmount = reservation.price
+    ? Number(reservation.price) - paidAmount
+    : 0;
+
   return {
     id: reservation.id,
     roomId: reservation.roomId,
     reservationType: reservation.reservationType,
     createdBy: reservation.createdBy,
-    brokerId: reservation.brokerId,
+    // brokerId: reservation.brokerId,
     checkIn: reservation.checkIn,
     checkOut: reservation.checkOut,
-    paidAmount: reservation.paidAmount,
+    price: reservation.price,
+    priceUnit: reservation.priceUnit,
+    brokerCommissionPercent: reservation.brokerCommissionPercent,
+    brokerCommissionAmount: reservation.brokerCommissionAmount,
+    customerDetails: reservation.customerDetails,
     paymentStatus: reservation.paymentStatus,
     notes: reservation.notes,
     hasCheckedIn: reservation.hasCheckedIn,
     hasCheckedOut: reservation.hasCheckedOut,
     createdAt: reservation.createdAt,
     updatedAt: reservation.updatedAt,
+    paidAmount,
+    remainingAmount,
     documents: reservation.documents?.map(documentTransformer) || [],
     customers: (reservation.customers || []).map(userTransformer) || [],
+    payments: reservation.payments || [],
     room: reservation.room
       ? {
           id: reservation.room.id,
@@ -92,11 +107,13 @@ function reservationTransformer(reservation) {
           updatedAt: reservation.room.updatedAt,
         }
       : undefined,
+    broker: reservation.broker ? userTransformer(reservation.broker) : null,
   };
 }
 
 function paymentTransformer(payment) {
   if (!payment) return null;
+  const { userTransformer } = require("./transformers");
   return {
     id: payment.id,
     reservationId: payment.reservationId,
@@ -107,7 +124,9 @@ function paymentTransformer(payment) {
     createdAt: payment.createdAt,
     updatedAt: payment.updatedAt,
     reservation: payment.reservation || undefined,
-    receivedByUser: payment.receivedByUser || undefined,
+    receivedByUser: payment.receivedByUser
+      ? userTransformer(payment.receivedByUser)
+      : undefined,
   };
 }
 

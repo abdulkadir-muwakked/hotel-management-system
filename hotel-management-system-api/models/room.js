@@ -18,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
     {
       roomNumber: DataTypes.STRING,
       capacity: DataTypes.INTEGER,
-      price: DataTypes.DECIMAL,
       description: DataTypes.TEXT,
       isClean: {
         type: DataTypes.BOOLEAN,

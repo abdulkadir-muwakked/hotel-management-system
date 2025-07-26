@@ -25,7 +25,9 @@ export default function AppSidebar() {
               />
             </svg>
           </span>
-          <span className="font-bold text-xl tracking-tight">ResidenceHub</span>
+          <span className="font-bold text-xl tracking-tight">
+            Academia Residence
+          </span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -268,7 +270,7 @@ export default function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <span className="text-xs text-muted-foreground px-4 py-2 block">
-          © 2025 ResidenceHub
+          © 2025 Academia Residence
         </span>
       </SidebarFooter>
     </>

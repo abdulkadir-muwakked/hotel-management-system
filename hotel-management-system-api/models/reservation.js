@@ -55,13 +55,28 @@ module.exports = (sequelize, DataTypes) => {
         ),
         allowNull: false,
       },
-      paymentStatus: {
-        type: DataTypes.ENUM("pending", "partial", "paid", "refunded"),
-        defaultValue: "pending",
+      price: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
       },
       checkIn: DataTypes.DATE,
       checkOut: DataTypes.DATE,
-      paidAmount: DataTypes.DECIMAL,
+      priceUnit: {
+        type: DataTypes.ENUM("daily", "weekly", "monthly", "seasonal"),
+        allowNull: true,
+      },
+      brokerCommissionPercent: {
+        type: DataTypes.DECIMAL,
+        allowNull: true,
+      },
+      brokerCommissionAmount: {
+        type: DataTypes.DECIMAL,
+        allowNull: true,
+      },
+      customerDetails: {
+        type: DataTypes.JSON,
+        allowNull: true,
+      },
       notes: DataTypes.TEXT,
       hasCheckedIn: {
         type: DataTypes.BOOLEAN,

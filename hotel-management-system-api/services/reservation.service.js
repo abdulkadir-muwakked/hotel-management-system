@@ -2,14 +2,7 @@ const db = require("../models");
 const { RESERVATION_TYPES, PAYMENT_STATUSES } = require("../utils/constants");
 
 async function validateReservationData(data, reservationId = null) {
-  const {
-    roomId,
-    reservationType,
-    checkIn,
-    checkOut,
-    paidAmount,
-    paymentStatus,
-  } = data;
+  const { roomId, reservationType, checkIn, checkOut, paymentStatus } = data;
 
   // تحقق من حالة الدفع إذا أُرسلت
   if (paymentStatus && !PAYMENT_STATUSES.includes(paymentStatus)) {
@@ -17,20 +10,15 @@ async function validateReservationData(data, reservationId = null) {
   }
 
   // تحقق من الحقول الأساسية
-  if (!roomId || !reservationType || !checkIn || !checkOut || !paidAmount) {
+  if (!roomId || !reservationType || !checkIn || !checkOut) {
     throw new Error(
-      "Missing required fields: roomId, reservationType, checkIn, checkOut, paidAmount"
+      "Missing required fields: roomId, reservationType, checkIn, checkOut"
     );
   }
 
   // تحقق من أن checkOut بعد checkIn
   if (new Date(checkOut) <= new Date(checkIn)) {
     throw new Error("Check-out date must be after check-in date");
-  }
-
-  // تحقق من أن paidAmount رقم موجب
-  if (isNaN(Number(paidAmount)) || Number(paidAmount) <= 0) {
-    throw new Error("paidAmount must be a positive number");
   }
 
   // تحقق من أن الغرفة موجودة
@@ -68,7 +56,11 @@ exports.createReservation = async (data) => {
     reservationType,
     checkIn,
     checkOut,
-    paidAmount,
+    price,
+    priceUnit,
+    brokerCommissionPercent,
+    brokerCommissionAmount,
+    customerDetails,
     paymentStatus,
     notes,
     customerIds = [],
@@ -79,7 +71,6 @@ exports.createReservation = async (data) => {
     reservationType,
     checkIn,
     checkOut,
-    paidAmount,
     paymentStatus,
   });
 
@@ -91,7 +82,11 @@ exports.createReservation = async (data) => {
     reservationType,
     checkIn,
     checkOut,
-    paidAmount,
+    price,
+    priceUnit,
+    brokerCommissionPercent,
+    brokerCommissionAmount,
+    customerDetails,
     paymentStatus: paymentStatus || "pending",
     notes: notes || null,
   });
@@ -161,7 +156,7 @@ exports.getAllReservations = async (filters = {}) => {
     {
       model: db.Room,
       as: "room",
-      attributes: ["id", "roomNumber", "capacity", "price", "description"],
+      attributes: ["id", "roomNumber", "capacity", "description"], // removed 'price'
     },
     {
       model: db.User,
@@ -219,7 +214,6 @@ exports.updateReservation = async (id, data) => {
       reservationType: data.reservationType ?? reservation.reservationType,
       checkIn: data.checkIn ?? reservation.checkIn,
       checkOut: data.checkOut ?? reservation.checkOut,
-      paidAmount: data.paidAmount ?? reservation.paidAmount,
       paymentStatus: data.paymentStatus ?? reservation.paymentStatus,
     },
     id

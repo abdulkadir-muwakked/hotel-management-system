@@ -135,16 +135,13 @@ export async function uploadUserDocuments(userId, documents) {
   if (!documents.length) return;
   const formData = new FormData();
   documents.forEach((file) => formData.append("documents", file));
-  const res = await fetch(
-    `${BASE_URL}/api/users/${userId}/documents`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: formData,
-    }
-  );
+  const res = await fetch(`${BASE_URL}/api/users/${userId}/documents`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: formData,
+  });
   if (!res.ok) throw new Error("Failed to upload documents");
   return await res.json();
 }
@@ -257,18 +254,35 @@ export async function getAllReservations() {
 }
 
 export async function updateReservation(id, updates) {
+  // تنظيف البيانات: حذف أي قيم undefined أو null
+  const cleanUpdates = {};
+  for (const key in updates) {
+    if (updates[key] !== undefined && updates[key] !== null) {
+      cleanUpdates[key] = updates[key];
+    }
+  }
+
+  console.log("Sending update payload:", cleanUpdates); // شوف شو عم يروح للسيرفر
+
   const res = await fetch(`${BASE_URL}/api/reservations/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },
-    body: JSON.stringify(updates),
+    body: JSON.stringify(cleanUpdates),
   });
+
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || "Failed to update reservation");
+
+  if (!res.ok) {
+    console.error("Failed to update:", data);
+    throw new Error(data.message || "Failed to update reservation");
+  }
+
   return data;
 }
+
 export async function deleteReservation(id) {
   const res = await fetch(`${BASE_URL}/api/reservations/${id}`, {
     method: "DELETE",
@@ -297,3 +311,89 @@ export async function createReservation(reservation) {
   return data;
 }
 //≈ -------------------Reservations---------------------------
+//≈ -------------------Payments---------------------------
+export async function getAllPayments() {
+  const res = await fetch(`${BASE_URL}/api/payments/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch payments");
+  const data = await res.json();
+  return data.payments || data.data || [];
+}
+
+export async function getPaymentById(id) {
+  const res = await fetch(`${BASE_URL}/api/payments/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch payment");
+  const data = await res.json();
+  return data.payment || data.data || data;
+}
+
+export async function getPaymentsByReservation(reservationId) {
+  const res = await fetch(
+    `${BASE_URL}/api/payments/reservations/${reservationId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Failed to fetch payments for reservation");
+  const data = await res.json();
+  return data.payments || data.data || [];
+}
+
+export async function createPayment(payment) {
+  const res = await fetch(`${BASE_URL}/api/payments/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(payment),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to create payment");
+  return data;
+}
+
+export async function updatePayment(id, payment) {
+  const res = await fetch(`${BASE_URL}/api/payments/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(payment),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to update payment");
+  return data;
+}
+
+export async function deletePayment(id) {
+  const res = await fetch(`${BASE_URL}/api/payments/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || "Failed to delete payment");
+  }
+  return true;
+}
+//≈ -------------------Payments---------------------------

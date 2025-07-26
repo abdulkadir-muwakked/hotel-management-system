@@ -8,9 +8,7 @@ exports.createReservation = async (req, res) => {
       ...req.body,
       createdBy: req.user.id,
     };
-
     const reservation = await reservationService.createReservation(data);
-
     return response.successWithMessage(
       "Reservation created successfully",
       res,
