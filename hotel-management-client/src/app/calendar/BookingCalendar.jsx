@@ -113,18 +113,18 @@ const BookingCalendar = ({
     // Wait for DOM to render
     const interval = setInterval(() => {
       // Find the main scrollable timeline area and header
-      const timeline = timelineRef.current?.querySelector('.rct-scroll');
-      const header = timelineRef.current?.querySelector('.rct-header-root');
+      const timeline = timelineRef.current?.querySelector(".rct-scroll");
+      const header = timelineRef.current?.querySelector(".rct-header-root");
       if (timeline && header) {
         headerRef.current = header;
         // Sync header scrollLeft with timeline
         const onScroll = () => {
           header.scrollLeft = timeline.scrollLeft;
         };
-        timeline.addEventListener('scroll', onScroll);
+        timeline.addEventListener("scroll", onScroll);
         // Clean up
         return () => {
-          timeline.removeEventListener('scroll', onScroll);
+          timeline.removeEventListener("scroll", onScroll);
         };
       }
     }, 100);
