@@ -13,13 +13,12 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup } from "@/components/ui/radio-group";
 import PaymentsSection from "@/components/PaymentsSection";
 import { useUsers } from "@/hooks/useUsers";
-import { useReservations } from "@/contexts/AuthContext";
+import { useReservations, useRooms } from "@/contexts/AuthContext";
 
 // Dummy API functions (replace with real ones)
 import {
   getAllUsers,
   createUser,
-  getAllRooms,
   getAllUsers as getBrokers,
   createReservation,
 } from "@/lib/utils";
@@ -90,11 +89,11 @@ export function CustomerSearch({ onSelect, onCreate }) {
 
 export default function CreateReservationPage() {
   const router = useRouter();
+  const { rooms, fetchRooms } = useRooms();
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createName, setCreateName] = useState("");
   const [brokers, setBrokers] = useState([]);
-  const [rooms, setRooms] = useState([]);
   const [documentsPreview, setDocumentsPreview] = useState([]);
   const [form, setForm] = useState({
     roomId: "",
@@ -118,11 +117,11 @@ export default function CreateReservationPage() {
   const { fetchReservations } = useReservations();
 
   React.useEffect(() => {
-    // Fetch brokers and rooms
+    // Fetch brokers
     getBrokers({ role: "broker" }).then((data) =>
       setBrokers(data.data.users || [])
     );
-    getAllRooms().then(setRooms);
+    fetchRooms(); // Always fetch latest rooms from context
   }, []);
 
   const handleFormChange = (e) => {
@@ -169,7 +168,7 @@ export default function CreateReservationPage() {
     const start = dayjs(form.checkIn);
     const end = dayjs(form.checkOut);
     // Always use absolute difference in days, inclusive
-    return end.diff(start, "day") + 1;
+    return end.diff(start, "day");
   };
 
   // Helper to build customerDetails for API
@@ -191,9 +190,10 @@ export default function CreateReservationPage() {
 
   const getTotalPrice = () => {
     if (!form.price) return 0;
-    if (form.priceUnit === "seasonal") {
+    if (form.priceUnit === "seasonal" || form.priceUnit === "month") {
       return Number(form.price);
     }
+    // Only multiply by days if priceUnit is 'day'
     const days = getDays();
     if (!days) return 0;
     return days * Number(form.price);
@@ -252,15 +252,20 @@ export default function CreateReservationPage() {
         Object.entries(payload).forEach(([key, value]) => {
           if (value === null || value === undefined) return;
           if (Array.isArray(value)) {
-            value.forEach((v) => formData.append(key, typeof v === 'object' ? JSON.stringify(v) : v));
-          } else if (typeof value === 'object') {
+            value.forEach((v) =>
+              formData.append(
+                key,
+                typeof v === "object" ? JSON.stringify(v) : v
+              )
+            );
+          } else if (typeof value === "object") {
             formData.append(key, JSON.stringify(value));
           } else {
             formData.append(key, value);
           }
         });
         documentsPreview.forEach((file) => {
-          formData.append('documents', file);
+          formData.append("documents", file);
         });
         result = await createReservation(formData, { isFormData: true });
       } else {
@@ -319,11 +324,18 @@ export default function CreateReservationPage() {
               required
             >
               <option value="">Select Room</option>
-              {rooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  Room {room.roomNumber} (Capacity: {room.capacity})
-                </option>
-              ))}
+              {[...rooms]
+                .sort((a, b) => {
+                  const aNum = Number(a.roomNumber);
+                  const bNum = Number(b.roomNumber);
+                  if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+                  return String(a.roomNumber).localeCompare(String(b.roomNumber));
+                })
+                .map((room) => (
+                  <option key={room.id} value={room.id}>
+                    Room {room.roomNumber} (Capacity: {room.capacity})
+                  </option>
+                ))}
             </Select>
             <Select
               name="brokerId"

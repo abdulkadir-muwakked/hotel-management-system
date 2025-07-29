@@ -107,11 +107,17 @@ exports.getRoomById = async (id) => {
 };
 
 exports.createRoom = async (data) => {
-  const { roomNumber, capacity, price, description } = data;
-  if (!roomNumber || !capacity || !price) {
-    throw new Error("roomNumber, capacity, and price are required");
+  const { roomNumber, capacity, description, isClean } = data;
+  if (!roomNumber || !capacity) {
+    throw new Error("roomNumber and capacity are required");
   }
-  return db.Room.create({ roomNumber, capacity, price, description });
+  // Only include fields that exist in the Room model
+  return db.Room.create({
+    roomNumber,
+    capacity,
+    description,
+    isClean: typeof isClean === "boolean" ? isClean : true, // default true
+  });
 };
 
 exports.updateRoom = async (id, data) => {

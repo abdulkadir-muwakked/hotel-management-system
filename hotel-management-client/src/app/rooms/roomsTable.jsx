@@ -34,6 +34,14 @@ export default function RoomsTable() {
     return <div className="text-center text-gray-400">No rooms found.</div>;
   }
 
+  // Sort rooms by roomNumber numerically if possible, otherwise lexicographically
+  const sortedRooms = [...rooms].sort((a, b) => {
+    const aNum = Number(a.roomNumber);
+    const bNum = Number(b.roomNumber);
+    if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+    return String(a.roomNumber).localeCompare(String(b.roomNumber));
+  });
+
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this room?")) return;
     setDeletingId(id);
@@ -80,7 +88,7 @@ export default function RoomsTable() {
       </TableHeader>
       <TableBody>
         {console.log("Rooms:", rooms)}
-        {rooms.map((room, idx) => (
+        {sortedRooms.map((room, idx) => (
           <TableRow
             key={
               room.id

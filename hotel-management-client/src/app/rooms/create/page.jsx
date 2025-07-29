@@ -14,7 +14,6 @@ export default function AddRoom() {
   const [form, setForm] = useState({
     roomNumber: "",
     capacity: "",
-    price: "",
     description: "",
   });
 
@@ -31,16 +30,18 @@ export default function AddRoom() {
     setLoading(true);
 
     try {
-      const newRoom = await createRoom({
-        ...form,
+      // Only send fields that exist in the form
+      const payload = {
+        roomNumber: form.roomNumber,
         capacity: Number(form.capacity),
-        price: Number(form.price),
-      });
+        description: form.description,
+      };
+      const newRoom = await createRoom(payload);
       addRoom(newRoom);
 
       router.push("/rooms"); // بعد النجاح بيرجعك لصفحة الغرف
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Failed to create room");
     } finally {
       setLoading(false);
     }
@@ -67,14 +68,7 @@ export default function AddRoom() {
           onChange={handleChange}
           required
         />
-        <Input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={form.price}
-          onChange={handleChange}
-          required
-        />
+
         <Textarea
           name="description"
           placeholder="Description (optional)"

@@ -94,19 +94,7 @@ function reservationTransformer(reservation) {
     documents: reservation.documents?.map(documentTransformer) || [],
     customers: (reservation.customers || []).map(userTransformer) || [],
     payments: reservation.payments || [],
-    room: reservation.room
-      ? {
-          id: reservation.room.id,
-          roomNumber: reservation.room.roomNumber,
-          capacity: reservation.room.capacity,
-          price: reservation.room.price,
-          description: reservation.room.description,
-          isClean: reservation.room.isClean,
-          status: reservation.room.status,
-          createdAt: reservation.room.createdAt,
-          updatedAt: reservation.room.updatedAt,
-        }
-      : undefined,
+    room: reservation.room ? roomTransformer(reservation.room) : undefined,
     broker: reservation.broker ? userTransformer(reservation.broker) : null,
   };
 }

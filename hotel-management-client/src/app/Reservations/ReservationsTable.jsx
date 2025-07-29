@@ -88,7 +88,7 @@ export default function ReservationsTable({
         ) : (
           filtered.map((res) => (
             <TableRow key={res.id}>
-              <TableCell>{res.roomId}</TableCell>
+              <TableCell>{res.room?.roomNumber || res.roomNumber || '-'}</TableCell>
               <TableCell>
                 <Badge
                   variant={

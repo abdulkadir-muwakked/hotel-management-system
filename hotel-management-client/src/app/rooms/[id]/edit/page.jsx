@@ -80,17 +80,6 @@ export default function EditRoomPage() {
             />
           </div>
           <div>
-            <Label htmlFor="price">Price</Label>
-            <Input
-              id="price"
-              name="price"
-              type="number"
-              value={room.price || ""}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
             <Label htmlFor="description">Description</Label>
             <Input
               id="description"
@@ -110,7 +99,6 @@ export default function EditRoomPage() {
               required
             >
               <option value="">Select status</option>
-              {/* <option value="occupied">Occupied</option> */}
               <option value="clean">Clean</option>
               <option value="dirty">Dirty</option>
             </select>
