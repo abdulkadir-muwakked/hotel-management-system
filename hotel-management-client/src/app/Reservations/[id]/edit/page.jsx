@@ -115,11 +115,13 @@ export default function EditReservationPage() {
           (r) => String(r.id) === String(id)
         );
         setReservation(found || null);
+        console.log("Found reservation:", found);
+
         setForm(
           found
             ? {
                 roomId: found.roomId || "",
-                brokerId: found.brokerId || "",
+                brokerId: found.broker?.id || "",
                 reservationType: found.reservationType || "student_male",
                 checkIn: found.checkIn
                   ? dayjs(found.checkIn).format("YYYY-MM-DD")
@@ -311,6 +313,16 @@ export default function EditReservationPage() {
             </Button>
           </div>
         )}
+        {/* Show broker info if present */}
+        {/* {form.brokerId && (
+          <div className="mb-2 p-2 border rounded bg-muted flex items-center gap-2">
+            <span className="font-semibold">Broker:</span>
+            <span>
+              {brokers.find((b) => String(b.id) === String(form.brokerId))
+                ?.username || form.brokerId}
+            </span>
+          </div>
+        )} */}
         {showCustomerSearch && !showCreateForm && (
           <CustomerSearch
             onSelect={handleCustomerSelect}
@@ -340,9 +352,10 @@ export default function EditReservationPage() {
               </option>
             ))}
           </Select>
+          {console.log(form)}
           <Select
             name="brokerId"
-            value={form.brokerId}
+            value={String(form.brokerId)}
             onChange={handleFormChange}
           >
             <option value="">No Broker</option>
@@ -505,6 +518,31 @@ export default function EditReservationPage() {
             value={form.notes}
             onChange={handleFormChange}
           />
+          {/* Add checkboxes for hasCheckedIn and hasCheckedOut */}
+          <div className="flex gap-4 items-center mb-2">
+            <label className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                name="hasCheckedIn"
+                checked={!!form.hasCheckedIn}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, hasCheckedIn: e.target.checked }))
+                }
+              />
+              Checked In
+            </label>
+            <label className="flex items-center gap-1">
+              <input
+                type="checkbox"
+                name="hasCheckedOut"
+                checked={!!form.hasCheckedOut}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, hasCheckedOut: e.target.checked }))
+                }
+              />
+              Checked Out
+            </label>
+          </div>
           {error && <div className="text-red-500 text-sm">{error}</div>}
           {success && <div className="text-green-600 text-sm">{success}</div>}
           <Button type="submit" disabled={saving} className="w-full">

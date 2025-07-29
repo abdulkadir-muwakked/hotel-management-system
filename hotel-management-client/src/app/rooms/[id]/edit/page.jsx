@@ -41,7 +41,14 @@ export default function EditRoomPage() {
     setSaving(true);
     setError("");
     try {
-      await updateRoom(roomId, room);
+      // Only send editable fields
+      const payload = {
+        roomNumber: room.roomNumber,
+        capacity: room.capacity,
+        description: room.description,
+        isClean: room.status === "clean",
+      };
+      await updateRoom(roomId, payload);
       router.push("/rooms");
     } catch (err) {
       setError(err.message || "Failed to update room");

@@ -28,14 +28,19 @@ async function validateReservationData(data, reservationId = null) {
   }
 
   // تحقق من عدم وجود حجز متداخل لنفس الغرفة (تجاهل الحجز الحالي عند التعديل)
+  // Adjusted for 2-hour buffer: checkout at 12:00, checkin at 14:00
+  const checkInDate = new Date(checkIn);
+  checkInDate.setHours(14, 0, 0, 0); // 2:00 PM
+  const checkOutDate = new Date(checkOut);
+  checkOutDate.setHours(12, 0, 0, 0); // 12:00 PM
+
   const where = {
     roomId,
     [db.Sequelize.Op.or]: [
-      { checkIn: { [db.Sequelize.Op.between]: [checkIn, checkOut] } },
-      { checkOut: { [db.Sequelize.Op.between]: [checkIn, checkOut] } },
+      // Existing reservation's checkIn is before new checkOut (12:00) and checkOut is after new checkIn (14:00)
       {
-        checkIn: { [db.Sequelize.Op.lte]: checkIn },
-        checkOut: { [db.Sequelize.Op.gte]: checkOut },
+        checkIn: { [db.Sequelize.Op.lt]: checkOutDate },
+        checkOut: { [db.Sequelize.Op.gt]: checkInDate },
       },
     ],
   };
@@ -44,7 +49,9 @@ async function validateReservationData(data, reservationId = null) {
   }
   const overlapping = await db.Reservation.findOne({ where });
   if (overlapping) {
-    throw new Error("Room is not available for the selected date range");
+    throw new Error(
+      "Room is not available for the selected date range (buffer window applies)"
+    );
   }
 }
 
@@ -96,7 +103,37 @@ exports.createReservation = async (data) => {
     await reservation.setCustomers(customerIds);
   }
 
-  return reservation;
+  // Fetch and return the reservation with all associations
+  return db.Reservation.findByPk(reservation.id, {
+    include: [
+      {
+        model: db.User,
+        as: "customers",
+        attributes: ["id", "username", "email", "phone"],
+        through: { attributes: [] },
+        include: [{ model: db.Document, as: "documents" }],
+      },
+      {
+        model: db.Room,
+        as: "room",
+        attributes: ["id", "roomNumber", "capacity", "description", "isClean"],
+      },
+      {
+        model: db.User,
+        as: "createdByUser",
+        include: [{ model: db.Document, as: "documents" }],
+      },
+      {
+        model: db.User,
+        as: "broker",
+        include: [{ model: db.Document, as: "documents" }],
+      },
+      {
+        model: db.Payment,
+        as: "payments",
+      },
+    ],
+  });
 };
 
 exports.getAllReservations = async (filters = {}) => {

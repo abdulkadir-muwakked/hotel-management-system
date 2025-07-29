@@ -230,8 +230,14 @@ export default function CreateReservationPage() {
         month: "monthly",
         seasonal: "seasonal",
       };
+      // Build payload with only allowed fields
       const payload = {
-        ...form,
+        roomId: form.roomId,
+        brokerId: form.brokerId || null,
+        reservationType: form.reservationType,
+        checkIn: form.checkIn,
+        checkOut: form.checkOut,
+        price: form.price,
         priceUnit: priceUnitMap[form.priceUnit] || form.priceUnit,
         customerIds: [selectedCustomer.id],
         customerDetails: getCustomerDetails(),
@@ -243,7 +249,8 @@ export default function CreateReservationPage() {
           form.brokerId && commissionType === "amount"
             ? brokerCommissionAmount
             : null,
-        payments,
+        notes: form.notes,
+        // payments removed
       };
       let result;
       if (documentsPreview && documentsPreview.length > 0) {
@@ -329,7 +336,9 @@ export default function CreateReservationPage() {
                   const aNum = Number(a.roomNumber);
                   const bNum = Number(b.roomNumber);
                   if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
-                  return String(a.roomNumber).localeCompare(String(b.roomNumber));
+                  return String(a.roomNumber).localeCompare(
+                    String(b.roomNumber)
+                  );
                 })
                 .map((room) => (
                   <option key={room.id} value={room.id}>
