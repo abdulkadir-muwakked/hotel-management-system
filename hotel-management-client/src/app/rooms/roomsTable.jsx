@@ -87,7 +87,6 @@ export default function RoomsTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {console.log("Rooms:", rooms)}
         {sortedRooms.map((room, idx) => (
           <TableRow
             key={

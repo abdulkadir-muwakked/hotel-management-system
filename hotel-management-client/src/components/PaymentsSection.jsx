@@ -40,7 +40,6 @@ export default function PaymentsSection({
     method: PAYMENT_METHODS[0].value,
     notes: "",
   });
-  console.log("Payments:", localPayments);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));

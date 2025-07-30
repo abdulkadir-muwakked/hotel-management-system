@@ -115,7 +115,6 @@ export default function EditReservationPage() {
           (r) => String(r.id) === String(id)
         );
         setReservation(found || null);
-        console.log("Found reservation:", found);
 
         setForm(
           found
@@ -352,7 +351,6 @@ export default function EditReservationPage() {
               </option>
             ))}
           </Select>
-          {console.log(form)}
           <Select
             name="brokerId"
             value={String(form.brokerId)}

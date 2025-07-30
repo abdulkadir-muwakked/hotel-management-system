@@ -168,12 +168,6 @@ export default function DashboardPage() {
         setReservations(reservationsRaw);
         setRooms(roomData.data?.rooms || roomData.rooms || roomData);
         // Debug logs
-        console.log("[Dashboard] reservationsRaw:", reservationsRaw);
-        console.log(
-          "[Dashboard] rooms:",
-          roomData.data?.rooms || roomData.rooms || roomData
-        );
-        console.log("[Dashboard] brokersArr:", brokersArr);
       } catch (err) {
         setError(err.message || "Failed to load dashboard data");
       } finally {

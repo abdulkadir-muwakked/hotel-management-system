@@ -23,7 +23,6 @@ export default function ViewReservationPage() {
   const [payments, setPayments] = useState([]); // Payments state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  console.log("Fetching reservation for reservation:", reservation);
 
   // Payments state and handler for PaymentsSection
   const handlePaymentsChange = (newPayments) => setPayments(newPayments);
@@ -191,7 +190,6 @@ export default function ViewReservationPage() {
             Back
           </Button>
         </div>
-        {console.log("Reservation Customers:", reservation.customers)}
       </div>
       <div>
         {/* Show user info for the first customer if available */}
@@ -201,7 +199,6 @@ export default function ViewReservationPage() {
             <UserViewPage user={reservation.customers[0]} />
           </div>
         )}
-        {console.log("reservation.customers[0]", reservation.customers[0])}
       </div>
       <div>
         <PaymentsSection

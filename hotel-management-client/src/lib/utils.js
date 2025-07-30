@@ -21,13 +21,10 @@ export async function login({ email, password }) {
   }
 
   const data = await res.json();
-  console.log(data);
 
   if (data.user && data.token) {
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(data.user));
-    console.log("user", JSON.stringify(data.user));
-    console.log("from localStorage ", localStorage.getItem("user"));
     return data.user;
   } else {
     console.warn("Login response missing user or token", data);
@@ -54,7 +51,6 @@ export async function getAllUsers(filters = {}) {
   }
 
   const data = await res.json();
-  console.log(data, "from getAllUsers");
   return data;
 }
 export async function getUserById(id) {
@@ -71,8 +67,6 @@ export async function getUserById(id) {
 }
 
 export async function updateUser(id, user) {
-  console.log("user", JSON.stringify(user));
-
   const res = await fetch(`${BASE_URL}/api/users/${id}`, {
     method: "PUT",
     headers: {
@@ -113,7 +107,6 @@ export async function uploadUserAvatar(id, file) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "Failed to upload avatar");
-  console.log("Avatar uploaded successfully:", data);
   return data;
 }
 
@@ -173,7 +166,6 @@ export async function getAllRooms(filters = {}) {
   }
 
   const data = await res.json();
-  console.log(data, "from getAllRooms");
   // Always return an array, even if undefined/null
   return data.rooms || data.data || (Array.isArray(data.data) ? data.data : []);
 }
@@ -248,7 +240,6 @@ export async function getAllReservations() {
   }
 
   const data = await res.json();
-  console.log(data, "from getAllReservations");
 
   return data.reservations || data.data || [];
 }
@@ -261,8 +252,6 @@ export async function updateReservation(id, updates) {
       cleanUpdates[key] = updates[key];
     }
   }
-
-  console.log("Sending update payload:", cleanUpdates); // شوف شو عم يروح للسيرفر
 
   const res = await fetch(`${BASE_URL}/api/reservations/${id}`, {
     method: "PUT",

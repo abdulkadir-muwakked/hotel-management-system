@@ -28,7 +28,6 @@ export default function ReservationsTable({
   const router = useRouter();
 
   let filtered = reservations?.data?.reservations || reservations || [];
-  console.log("Filtered Reservations:", filtered);
 
   if (search) {
     const s = search.toLowerCase();
@@ -88,7 +87,9 @@ export default function ReservationsTable({
         ) : (
           filtered.map((res) => (
             <TableRow key={res.id}>
-              <TableCell>{res.room?.roomNumber || res.roomNumber || '-'}</TableCell>
+              <TableCell>
+                {res.room?.roomNumber || res.roomNumber || "-"}
+              </TableCell>
               <TableCell>
                 <Badge
                   variant={
