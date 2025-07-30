@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@babel/runtime": "^7.28.2",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-label": "^2.1.7",
@@ -16,17 +17,25 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@visx/axis": "^3.12.0",
+    "@visx/drag": "^3.12.0",
+    "@visx/grid": "^3.12.0",
+    "@visx/group": "^3.12.0",
+    "@visx/shape": "^3.12.0",
+    "@visx/visx": "^3.12.0",
     "chart.js": "^4.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "d3": "^7.9.0",
     "dayjs": "^1.11.13",
     "lucide-react": "^0.523.0",
     "next": "15.3.4",
     "react": "^19.0.0",
-    "react-calendar-timeline": "^0.30.0-beta.3",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.3.1"
+    "react-vis-timeline": "^2.0.3",
+    "tailwind-merge": "^3.3.1",
+    "vis-timeline": "^8.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
