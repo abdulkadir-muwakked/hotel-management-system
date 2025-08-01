@@ -139,6 +139,7 @@ function roomTransformer(room) {
     status,
     createdAt: room.createdAt,
     updatedAt: room.updatedAt,
+    type: room.type,
     reservations: (room.reservations || []).map((reservation) => ({
       id: reservation.id,
       roomId: reservation.roomId,

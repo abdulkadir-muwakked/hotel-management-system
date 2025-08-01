@@ -2,10 +2,12 @@
 
 import { useMemo, useCallback, useState, useEffect, useRef } from "react";
 import dayjs from "dayjs";
-import { useAuth, useReservations, useRooms } from "@/contexts/AuthContext";
+import { useAuth, useReservations } from "@/contexts/AuthContext";
 import { updateReservation as apiUpdateReservation } from "@/lib/utils";
+import { useFilteredRooms } from "@/lib/utils";
 import { DataSet, Timeline as VisTimeline } from "vis-timeline/standalone";
 import "vis-timeline/styles/vis-timeline-graph2d.min.css";
+import { Select } from "@/components/ui/select";
 
 const ZOOM_LEVELS = [
   { label: "Week", value: "week", ms: 7 * 24 * 60 * 60 * 1000 },
@@ -17,14 +19,15 @@ const ZOOM_LEVELS = [
 
 const BookingCalendar = ({
   search = "",
-  type = "",
+  type: initialType = "",
   fromDate = "",
   toDate = "",
   locale = "en", // Optionally pass locale
 }) => {
+  const [type, setType] = useState(initialType);
   const { user } = useAuth();
   const { reservations, loading, error, fetchReservations } = useReservations();
-  const { rooms } = useRooms();
+  const { rooms } = useFilteredRooms({ type });
   const canEdit = user && ["admin", "receptionist"].includes(user.role);
   const timelineDivRef = useRef(null);
   const timelineInstance = useRef(null);
@@ -271,6 +274,14 @@ const BookingCalendar = ({
       <h2 className="text-2xl font-semibold mb-4" style={{ marginTop: 0 }}>
         Booking Calendar
       </h2>
+      <div className="mb-4 flex gap-2 items-center">
+        <Select value={type} onValueChange={setType}>
+          <option value="">All Types</option>
+          <option value="student">Student</option>
+          <option value="medical">Medical</option>
+          <option value="customer">Customer</option>
+        </Select>
+      </div>
       {/* User instructions */}
       <div style={{ marginBottom: 8, color: "#666", fontSize: 14 }}>
         Use the zoom buttons to control the timeline. To scroll horizontally,

@@ -6,6 +6,7 @@ import {
   getAllRooms,
   getAllReservations,
   createRoom as apiCreateRoom,
+  sortRooms,
 } from "@/lib/utils";
 //---------------------------------- Auth Context
 const AuthContext = createContext();
@@ -107,7 +108,7 @@ const RoomProvider = ({ children }) => {
     setLoading(true);
     try {
       const data = await getAllRooms(filters);
-      setRooms(data);
+      setRooms(sortRooms(data));
     } catch (err) {
       console.error("Error fetching rooms:", err);
     } finally {

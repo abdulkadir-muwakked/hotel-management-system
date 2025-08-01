@@ -24,6 +24,11 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: true,
         allowNull: false,
       },
+      type: {
+        type: DataTypes.ENUM("student", "medical", "customer"),
+        allowNull: false,
+        defaultValue: "customer",
+      },
     },
     {
       sequelize,

@@ -40,7 +40,7 @@ exports.createRoom = async (req, res) => {
   try {
     const room = await roomService.createRoom(req.body);
     return response.successWithMessage("Room created successfully", res, {
-      room,
+      room: roomTransformer(room),
     });
   } catch (err) {
     return response.failedWithMessage(
@@ -55,7 +55,7 @@ exports.updateRoom = async (req, res) => {
     const room = await roomService.updateRoom(req.params.id, req.body);
     if (!room) return response.failedWithMessage("Room not found", res);
     return response.successWithMessage("Room updated successfully", res, {
-      room,
+      room: roomTransformer(room),
     });
   } catch (err) {
     return response.failedWithMessage(

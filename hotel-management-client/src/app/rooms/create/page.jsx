@@ -35,6 +35,7 @@ export default function AddRoom() {
         roomNumber: form.roomNumber,
         capacity: Number(form.capacity),
         description: form.description,
+        type: form.type || "customer",
       };
       const newRoom = await createRoom(payload);
       addRoom(newRoom);
@@ -75,6 +76,18 @@ export default function AddRoom() {
           value={form.description}
           onChange={handleChange}
         />
+
+        <select
+          name="type"
+          value={form.type || "customer"}
+          onChange={handleChange}
+          className="w-full border rounded px-2 py-1"
+          required
+        >
+          <option value="customer">Customer</option>
+          <option value="student">Student</option>
+          <option value="medical">Medical</option>
+        </select>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 

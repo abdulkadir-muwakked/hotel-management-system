@@ -47,6 +47,7 @@ export default function EditRoomPage() {
         capacity: room.capacity,
         description: room.description,
         isClean: room.status === "clean",
+        type: room.type || "customer",
       };
       await updateRoom(roomId, payload);
       router.push("/rooms");
@@ -108,6 +109,21 @@ export default function EditRoomPage() {
               <option value="">Select status</option>
               <option value="clean">Clean</option>
               <option value="dirty">Dirty</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="type">Room Type</Label>
+            <select
+              id="type"
+              name="type"
+              value={room.type || "customer"}
+              onChange={handleChange}
+              className="w-full border rounded px-2 py-1"
+              required
+            >
+              <option value="customer">Customer</option>
+              <option value="student">Student</option>
+              <option value="medical">Medical</option>
             </select>
           </div>
           {/* Show reservations info (read-only) */}

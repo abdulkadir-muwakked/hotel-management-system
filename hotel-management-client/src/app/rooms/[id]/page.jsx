@@ -42,6 +42,13 @@ export default function RoomViewPage() {
         <div className="mb-2 flex gap-2">
           <Badge>Capacity: {room.capacity}</Badge>
           <Badge>Price: {room.price}</Badge>
+          <Badge variant="default">
+            {room.type === "student"
+              ? "Student"
+              : room.type === "medical"
+              ? "Medical"
+              : "Customer"}
+          </Badge>
         </div>
         <div className="mb-2 text-gray-700">
           Description: {room.description || "-"}

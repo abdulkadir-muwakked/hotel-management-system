@@ -7,6 +7,10 @@ exports.getAllRooms = async ({ available, roomNumber, search, type }) => {
     where.roomNumber = roomNumber;
   }
 
+  if (type) {
+    where.type = type;
+  }
+
   if (search) {
     where[db.Sequelize.Op.or] = [
       { roomNumber: { [db.Sequelize.Op.iLike]: `%${search}%` } },
@@ -107,7 +111,7 @@ exports.getRoomById = async (id) => {
 };
 
 exports.createRoom = async (data) => {
-  const { roomNumber, capacity, description, isClean } = data;
+  const { roomNumber, capacity, description, isClean, type } = data;
   if (!roomNumber || !capacity) {
     throw new Error("roomNumber and capacity are required");
   }
@@ -117,13 +121,21 @@ exports.createRoom = async (data) => {
     capacity,
     description,
     isClean: typeof isClean === "boolean" ? isClean : true, // default true
+    type: type || "customer",
   });
 };
 
 exports.updateRoom = async (id, data) => {
   const room = await db.Room.findByPk(id);
   if (!room) return null;
-  await room.update(data);
+  // Only update allowed fields
+  const updateData = {};
+  if (data.roomNumber !== undefined) updateData.roomNumber = data.roomNumber;
+  if (data.capacity !== undefined) updateData.capacity = data.capacity;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.isClean !== undefined) updateData.isClean = data.isClean;
+  if (data.type !== undefined) updateData.type = data.type;
+  await room.update(updateData);
   return room;
 };
 

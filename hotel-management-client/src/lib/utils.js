@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useEffect, useState } from "react";
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -386,3 +387,35 @@ export async function deletePayment(id) {
   return true;
 }
 //≈ -------------------Payments---------------------------
+export function sortRooms(rooms) {
+  return [...rooms].sort((a, b) => {
+    const aNum = Number(a.roomNumber);
+    const bNum = Number(b.roomNumber);
+    if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+    return String(a.roomNumber).localeCompare(String(b.roomNumber));
+  });
+}
+
+export function useFilteredRooms({ type }) {
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchRooms() {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await getAllRooms(type ? { type } : {});
+        setRooms(sortRooms(data));
+      } catch (err) {
+        setError(err.message || "Failed to fetch rooms");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRooms();
+  }, [type]);
+
+  return { rooms, loading, error };
+}
