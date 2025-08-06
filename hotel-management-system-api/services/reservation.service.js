@@ -34,24 +34,50 @@ async function validateReservationData(data, reservationId = null) {
   const checkOutDate = new Date(checkOut);
   checkOutDate.setHours(12, 0, 0, 0); // 12:00 PM
 
-  const where = {
-    roomId,
-    [db.Sequelize.Op.or]: [
-      // Existing reservation's checkIn is before new checkOut (12:00) and checkOut is after new checkIn (14:00)
-      {
-        checkIn: { [db.Sequelize.Op.lt]: checkOutDate },
-        checkOut: { [db.Sequelize.Op.gt]: checkInDate },
-      },
-    ],
-  };
-  if (reservationId) {
-    where.id = { [db.Sequelize.Op.ne]: reservationId };
-  }
-  const overlapping = await db.Reservation.findOne({ where });
-  if (overlapping) {
-    throw new Error(
-      "Room is not available for the selected date range (buffer window applies)"
-    );
+  // جلب نوع الغرفة
+  const roomType = room.type;
+
+  if (roomType === "customer") {
+    // لا يسمح بحجزين متداخلين لنفس الشقة لنوع customer
+    const where = {
+      roomId,
+      [db.Sequelize.Op.or]: [
+        {
+          checkIn: { [db.Sequelize.Op.lt]: checkOutDate },
+          checkOut: { [db.Sequelize.Op.gt]: checkInDate },
+        },
+      ],
+    };
+    if (reservationId) {
+      where.id = { [db.Sequelize.Op.ne]: reservationId };
+    }
+    const overlapping = await db.Reservation.findOne({ where });
+    if (overlapping) {
+      throw new Error(
+        "Room is not available for the selected date range (buffer window applies)"
+      );
+    }
+  } else {
+    // إذا كانت الشقة من نوع طالب أو دكتور، تحقق فقط من السعة
+    // احسب عدد الحجوزات المتداخلة في نفس الفترة
+    const where = {
+      roomId,
+      [db.Sequelize.Op.or]: [
+        {
+          checkIn: { [db.Sequelize.Op.lt]: checkOutDate },
+          checkOut: { [db.Sequelize.Op.gt]: checkInDate },
+        },
+      ],
+    };
+    if (reservationId) {
+      where.id = { [db.Sequelize.Op.ne]: reservationId };
+    }
+    const overlappingCount = await db.Reservation.count({ where });
+    if (overlappingCount >= room.capacity) {
+      throw new Error(
+        "Room capacity is full for the selected date range (buffer window applies)"
+      );
+    }
   }
 }
 

@@ -266,6 +266,27 @@ export default function AppSidebar() {
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              href="/signup"
+              isActive={pathname === "/signup"}
+            >
+              <a>
+                <span className="mr-2">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path
+                      d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm0 4a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm0 12c2.67 0 8 1.34 8 4v2H4v-2c0-2.66 5.33-4 8-4z"
+                      stroke="#64748b"
+                      strokeWidth="2"
+                      fill="none"
+                    />
+                  </svg>
+                </span>
+                Signup
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

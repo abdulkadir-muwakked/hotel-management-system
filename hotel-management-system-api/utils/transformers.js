@@ -177,13 +177,7 @@ function roomTransformer(room) {
               )
           ) || null,
       },
-      customers:
-        (reservation.customers || []).map((customer) =>
-          userTransformer({
-            ...customer,
-            documents: customer.documents || customer.Documents || [],
-          })
-        ) || [],
+      customers: (reservation.customers || []).map(userTransformer) || [],
       payments: (reservation.payments || []).map(paymentTransformer),
     })),
   };
