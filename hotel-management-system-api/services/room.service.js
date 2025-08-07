@@ -7,8 +7,10 @@ exports.getAllRooms = async ({ available, roomNumber, search, type }) => {
     where.roomNumber = roomNumber;
   }
 
-  if (type) {
-    where.type = type;
+  // فلترة فقط على Room.type بمطابقة غير حساسة لحالة الأحرف
+  if (type && typeof type === "string" && type.trim() !== "") {
+    // استخدم LIKE بدلاً من ILIKE إذا كنت تستخدم MySQL
+    where.type = { [db.Sequelize.Op.like]: type.trim() };
   }
 
   if (search) {
@@ -19,19 +21,16 @@ exports.getAllRooms = async ({ available, roomNumber, search, type }) => {
   }
 
   // 🔥 فلتر نوع الحجز
-  const reservationWhere = {};
-  if (type) {
-    reservationWhere.reservationType = type;
-  }
+  // const reservationWhere = {};
+  // if (type) {
+  //   reservationWhere.reservationType = type;
+  // }
 
   const include = [
     {
       model: db.Reservation,
       as: "reservations",
-      where: Object.keys(reservationWhere).length
-        ? reservationWhere
-        : undefined,
-      required: !!type, // ← هون السر
+      required: false,
       include: [
         {
           model: db.User,

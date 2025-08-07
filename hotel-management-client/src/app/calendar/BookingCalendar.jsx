@@ -27,7 +27,7 @@ const BookingCalendar = ({
   const [type, setType] = useState(initialType);
   const { user } = useAuth();
   const { reservations, loading, error, fetchReservations } = useReservations();
-  const { rooms } = useFilteredRooms({ type });
+  const { rooms } = useFilteredRooms(type ? { type } : {});
   const canEdit = user && ["admin", "receptionist"].includes(user.role);
   const timelineDivRef = useRef(null);
   const timelineInstance = useRef(null);
@@ -89,6 +89,9 @@ const BookingCalendar = ({
         return checkOut.endOf("day").valueOf() <= to.endOf("day").valueOf();
       });
     }
+    // Only include reservations whose roomId matches a room in the current rooms list
+    const roomIds = new Set((rooms || []).map(r => String(r.id || r._id || r.roomId)));
+    resList = resList.filter(res => roomIds.has(String(res.roomId)));
     return resList.map((res) => ({
       id: String(res.id),
       group: String(res.roomId),
@@ -152,8 +155,11 @@ const BookingCalendar = ({
 
   // Timeline options
   const options = useMemo(() => {
+    // Enable stacking for student/medical, disable for others
+    const isStacked =
+      type === "student" || type === "medical" || type === "";
     const opts = {
-      stack: false,
+      stack: isStacked, // <-- key change
       orientation: { axis: "top", item: "bottom" },
       min: dayjs().subtract(10, "year").toDate(),
       max: dayjs().add(10, "year").toDate(),
@@ -161,7 +167,6 @@ const BookingCalendar = ({
       zoomMax: 2 * 365 * 24 * 60 * 60 * 1000, // 2 years
       moveable: true,
       zoomable: true, // allow zoom in/out with mouse/touch
-      dragToMove: true,
       horizontalScroll: true,
       verticalScroll: true,
       editable: !!canEdit,
@@ -177,7 +182,7 @@ const BookingCalendar = ({
       opts.end = timelineRange.end;
     }
     return opts;
-  }, [timelineRange, canEdit]);
+  }, [timelineRange, canEdit, type]);
 
   // دالة لتغيير الزوم يدويًا
   const handleZoomButton = useCallback((zoomValue) => {
@@ -374,11 +379,8 @@ const BookingCalendar = ({
           <div className="text-gray-500">
             No rooms available to display on the timeline.
           </div>
-        ) : items.length === 0 ? (
-          <div className="text-gray-500">
-            No reservations to display on the timeline.
-          </div>
         ) : (
+          // Always show the timeline if there are rooms, even if items.length === 0
           <div
             ref={timelineDivRef}
             style={{
